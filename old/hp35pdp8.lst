@@ -1,0 +1,2825 @@
+
+
+
+      /HP-35 EMULATOR                                                     Page 1
+
+
+    1              /HP-35 EMULATOR
+    2              /KYLE OWEN - 6/17/2013
+    3              
+    4        0000  *0000
+    5 00000  0000  DECODE, 0000            /1 (12 BITS)
+    6 00001  0000  REGS,   0000            /1 (12 BITS)
+    7 00002  0000  P,      0000            /1 (4 BITS)
+    8 00003  0000  ROM,    0000            /1 (3 BITS)
+    9 00004  0000  RET,    0000            /1 (8 BITS)
+   10 00005  0000  OPCODE, 0000            /1 (10 BITS)
+   11 00006  0000  FIRST,  0000            /1 (4 BITS)
+   12 00007  0000  LAST,   0000            /1 (4 BITS)
+   13              
+   14        0010  *0010                   /AUTO-INCREMENT!
+   15 00010  0000  INDEX1, 0000            /1 (12 BITS)
+   16 00011  0000  INDEX2, 0000            /1 (12 BITS)
+   17 00012  0000  DISPEN, 0000            /1 (1 BIT)
+   18 00013  0000  UPDATE, 0000            /1 (1 BIT)
+   19 00014  0000  CARRY,  0000            /1 (1 BIT)
+   20 00015  0000  PCARRY, 0000            /1 (1 BIT)
+   21 00016  0000  ERR,    0000            /1 (1 BIT)
+   22              
+   23        0020  *0020
+   24 00020  0000  PC,     0000            /1 (8 BITS)
+   25 00021  0000  DELROM, 0000            /1 (3 BITS)
+   26 00022  0000  ADDR,   0000
+   27 00023  0000  KEYC,   0000            /1 (8 BITS)
+   28 00024  0000  KEYR,   0000            /1 (8 BITS)
+   29 00025  0000  SIZE,   0000            /1 (12 BITS)
+   30 00026  0000  REGTOP, 0000            /1 (12 BITS)
+   31 00027  0000  REGIDX, 0000            /1 (12 BITS)
+   32 00030  0000  NEWIDX, 0000
+   33 00031  0000  ATIO,   0000            /1 (12 BITS)
+   34 00032  0000  DEBUG,  0000            /DEBUG MODE (SET BY SR)
+   35              
+   36 00033  0000  REGA,   0000            /7 (56 BITS)
+   37 00034  0000          0000
+   38 00035  0000          0000
+   39 00036  0000          0000
+   40 00037  0000          0000
+   41 00040  0000          0000
+   42 00041  0000          0000
+   43 00042  0000  REGB,   0000            /7 (56 BITS)
+   44 00043  0000          0000
+   45 00044  0000          0000
+   46 00045  0000          0000
+   47 00046  0000          0000
+   48 00047  0000          0000
+   49 00050  0000          0000
+   50 00051  0000  REGC,   0000            /7 (56 BITS)
+
+
+
+      /HP-35 EMULATOR                                                     Page 2
+
+
+   51 00052  0000          0000
+   52 00053  0000          0000
+   53 00054  0000          0000
+   54 00055  0000          0000
+   55 00056  0000          0000
+   56 00057  0000          0000
+   57 00060  0000  REGD,   0000            /7 (56 BITS)
+   58 00061  0000          0000
+   59 00062  0000          0000
+   60 00063  0000          0000
+   61 00064  0000          0000
+   62 00065  0000          0000
+   63 00066  0000          0000
+   64 00067  0000  REGE,   0000            /7 (56 BITS)
+   65 00070  0000          0000
+   66 00071  0000          0000
+   67 00072  0000          0000
+   68 00073  0000          0000
+   69 00074  0000          0000
+   70 00075  0000          0000
+   71 00076  0000  REGF,   0000            /7 (56 BITS)
+   72 00077  0000          0000
+   73 00100  0000          0000
+   74 00101  0000          0000
+   75 00102  0000          0000
+   76 00103  0000          0000
+   77 00104  0000          0000
+   78 00105  0000  REGM,   0000            /7 (56 BITS)
+   79 00106  0000          0000
+   80 00107  0000          0000
+   81 00110  0000          0000
+   82 00111  0000          0000
+   83 00112  0000          0000
+   84 00113  0000          0000
+   85 00114  0000  TEMP,   0000            /7 (56 BITS)
+   86 00115  0000  BYTE1,  0000
+   87 00116  0000  BYTE2,  0000
+   88 00117  0000  RESULT, 0000
+   89 00120  0000          0000
+   90 00121  0000          0000
+   91 00122  0000          0000
+   92 00123  7777  HLTINS, 7777            /INSTRUCTION TO HALT ON (7777 FOR NO HALT)
+   93              
+   94        0200          *0200                   /START OF PROGRAM
+   95 00200  1377          TAD     (INSTLU-1)
+   96 00201  3010          DCA     INDEX1
+   97 00202  1177          TAD     [-0400]         /1024 / 4 = 256
+   98 00203  3025          DCA     SIZE
+   99 00204  1176  INIT1,  TAD     [ERROR]
+  100 00205  3410          DCA I   INDEX1
+
+
+
+      /HP-35 EMULATOR                                                     Page 3
+
+
+  101 00206  1175          TAD     [JSB]
+  102 00207  3410          DCA I   INDEX1
+  103 00210  1174          TAD     [ARITH]
+  104 00211  3410          DCA I   INDEX1
+  105 00212  1173          TAD     [GOTO]
+  106 00213  3410          DCA I   INDEX1
+  107 00214  2025          ISZ     SIZE
+  108 00215  5204          JMP     INIT1
+  109                      
+  110 00216  1376          TAD     (INSTLU)
+  111 00217  3114          DCA     TEMP
+  112 00220  1172          TAD     [-0020]         /1024 / 64 = 16
+  113 00221  3025          DCA     SIZE
+  114 00222  1114  INIT2,  TAD     TEMP
+  115 00223  0375          AND     (0100)
+  116 00224  7440          SZA
+  117 00225  5240          JMP     INIT3
+  118 00226  1114          TAD     TEMP
+  119 00227  1374          TAD     (0020)
+  120 00230  3117          DCA     RESULT
+  121 00231  1171          TAD     [SELROM]
+  122 00232  3517          DCA I   RESULT
+  123 00233  1117          TAD     RESULT
+  124 00234  1373          TAD     (0144)
+  125 00235  3117          DCA     RESULT
+  126 00236  1170          TAD     [DSROM]
+  127 00237  3517          DCA I   RESULT
+  128 00240  7200  INIT3,  CLA
+  129 00241  1114          TAD     TEMP
+  130 00242  1372          TAD     (0004)
+  131 00243  3117          DCA     RESULT
+  132 00244  1167          TAD     [SETS]
+  133 00245  3517          DCA I   RESULT
+  134 00246  1117          TAD     RESULT
+  135 00247  1371          TAD     (0010)
+  136 00250  3117          DCA     RESULT
+  137 00251  1166          TAD     [SETP]
+  138 00252  3517          DCA I   RESULT
+  139 00253  1117          TAD     RESULT
+  140 00254  1371          TAD     (0010)
+  141 00255  3117          DCA     RESULT
+  142 00256  1165          TAD     [TESTS]
+  143 00257  3517          DCA I   RESULT
+  144 00260  1117          TAD     RESULT
+  145 00261  1372          TAD     (0004)
+  146 00262  3117          DCA     RESULT
+  147 00263  1164          TAD     [LDCONS]
+  148 00264  3517          DCA I   RESULT
+  149 00265  1117          TAD     RESULT
+  150 00266  1372          TAD     (0004)
+
+
+
+      /HP-35 EMULATOR                                                     Page 4
+
+
+  151 00267  3117          DCA     RESULT
+  152 00270  1163          TAD     [DECP]
+  153 00271  3517          DCA I   RESULT
+  154 00272  1117          TAD     RESULT
+  155 00273  1371          TAD     (0010)
+  156 00274  3117          DCA     RESULT
+  157 00275  1162          TAD     [CLRSB]
+  158 00276  3517          DCA I   RESULT
+  159 00277  1117          TAD     RESULT
+  160 00300  1371          TAD     (0010)
+  161 00301  3117          DCA     RESULT
+  162 00302  1161          TAD     [TESTP]
+  163 00303  3517          DCA I   RESULT
+  164 00304  1117          TAD     RESULT
+  165 00305  1374          TAD     (0020)
+  166 00306  3117          DCA     RESULT
+  167 00307  1160          TAD     [INCP]
+  168 00310  3517          DCA I   RESULT
+  169 00311  1114          TAD     TEMP
+  170 00312  1375          TAD     (0100)
+  171 00313  3114          DCA     TEMP
+  172 00314  2025          ISZ     SIZE
+  173 00315  5222          JMP     INIT2
+  174 00316  5770@         JMP     INIT4
+  175                      
+      00370  0400
+      00371  0010
+      00372  0004
+      00373  0144
+      00374  0020
+      00375  0100
+      00376  4000
+      00377  3777
+  176                      PAGE
+  177                      
+  178 00400  1377  INIT4,  TAD     (INSTLU)
+  179 00401  3117          DCA     RESULT
+  180 00402  1157          TAD     [OPNOP]
+  181 00403  3517          DCA I   RESULT
+  182 00404  1117          TAD     RESULT
+  183 00405  1376          TAD     (0050)
+  184 00406  3117          DCA     RESULT
+  185 00407  1156          TAD     [DISPT]
+  186 00410  3517          DCA I   RESULT
+  187 00411  1117          TAD     RESULT
+  188 00412  1375          TAD     (0010)
+  189 00413  3117          DCA     RESULT
+  190 00414  1155          TAD     [RETS]
+  191 00415  3517          DCA I   RESULT
+  192 00416  1117          TAD     RESULT
+
+
+
+      /HP-35 EMULATOR                                                     Page 5
+
+
+  193 00417  1374          TAD     (0004)
+  194 00420  3117          DCA     RESULT
+  195 00421  1154          TAD     [CLRS]
+  196 00422  3517          DCA I   RESULT
+  197 00423  1117          TAD     RESULT
+  198 00424  1373          TAD     (0164)
+  199 00425  3117          DCA     RESULT
+  200 00426  1153          TAD     [CEXCHM]
+  201 00427  3517          DCA I   RESULT
+  202 00430  1117          TAD     RESULT
+  203 00431  1376          TAD     (0050)
+  204 00432  3117          DCA     RESULT
+  205 00433  1152          TAD     [KTOROM]
+  206 00434  3517          DCA I   RESULT
+  207 00435  1117          TAD     RESULT
+  208 00436  1372          TAD     (0130)
+  209 00437  3117          DCA     RESULT
+  210 00440  1151          TAD     [PUSHC]
+  211 00441  3517          DCA I   RESULT
+  212 00442  1117          TAD     RESULT
+  213 00443  1371          TAD     (0200)
+  214 00444  3117          DCA     RESULT
+  215 00445  1150          TAD     [PULLA]
+  216 00446  3517          DCA I   RESULT
+  217 00447  1117          TAD     RESULT
+  218 00450  1371          TAD     (0200)
+  219 00451  3117          DCA     RESULT
+  220 00452  1147          TAD     [DISOFF]
+  221 00453  3517          DCA I   RESULT
+  222 00454  1117          TAD     RESULT
+  223 00455  1371          TAD     (0200)
+  224 00456  3117          DCA     RESULT
+  225 00457  1146          TAD     [MTOC]
+  226 00460  3517          DCA I   RESULT
+  227 00461  1117          TAD     RESULT
+  228 00462  1371          TAD     (0200)
+  229 00463  3117          DCA     RESULT
+  230 00464  1145          TAD     [ROTATE]
+  231 00465  3517          DCA I   RESULT
+  232 00466  1117          TAD     RESULT
+  233 00467  1371          TAD     (0200)
+  234 00470  3117          DCA     RESULT
+  235 00471  1144          TAD     [CLEARR]
+  236 00472  3517          DCA I   RESULT
+  237                      
+  238 00473  7200          CLA
+  239 00474  3002          DCA     P               /CLEAR POINTER
+  240 00475  3003          DCA     ROM             /CLEAR ROM SELECT
+  241 00476  3004          DCA     RET             /CLEAR RETURN
+  242 00477  3014          DCA     CARRY           /CLEAR CARRY
+
+
+
+      /HP-35 EMULATOR                                                     Page 6
+
+
+  243 00500  3015          DCA     PCARRY          /CLEAR PREV CARRY
+  244 00501  3021          DCA     DELROM          /CLEAR DELROM SELECT
+  245 00502  3022          DCA     ADDR            /CLEAR ADDRESS
+  246 00503  3024          DCA     KEYR            /CLEAR KEY ROM
+  247 00504  3020          DCA     PC              /CLEAR PC
+  248 00505  7040          CMA                     /ACC = 7777 (-1)
+  249 00506  3023          DCA     KEYC            /KEY CODE = -1
+  250 00507  7040          CMA
+  251 00510  3013          DCA     UPDATE          /UPDATE DISPLAY
+  252 00511  7040          CMA
+  253 00512  3012          DCA     DISPEN          /ENABLE DISPLAY
+  254 00513  6032          KCC                     /PREPARE KEYBOARD INPUT
+  255              
+  256              /MAIN LOOP
+  257 00514  7300  LOOP,   CLA CLL
+  258 00515  1014          TAD     CARRY           /GET CARRY
+  259 00516  3015          DCA     PCARRY          /PCARRY = CARRY
+  260 00517  3014          DCA     CARRY           /CLEAR CARRY
+  261 00520  1003          TAD     ROM             /GET ROM #
+  262 00521  7006          RTL
+  263 00522  7002          BSW                     /MULTIPLY BY 256
+  264 00523  1020          TAD     PC              /ADD PC
+  265 00524  3022          DCA     ADDR            /SAVE ADDRESS
+  266 00525  1022          TAD     ADDR
+  267 00526  1370          TAD     (ROM35)         /ADD START OF ROM DUMP
+  268 00527  3114          DCA     TEMP            /DEPOSIT ADDRESS
+  269 00530  1514          TAD I   TEMP            /FETCH OPCODE FROM ROM
+  270 00531  3005          DCA     OPCODE          /SAVE OPCODE
+  271 00532  1020          TAD     PC              /GET PC
+  272 00533  7001          IAC                     /INCREMENT PC
+  273 00534  0143          AND     [0377]          /PC %= 256
+  274 00535  3020          DCA     PC              /SAVE PC
+  275 00536  1022          TAD     ADDR
+  276 00537  1367          TAD     (-0277)         /IS THERE AN ERROR?
+  277 00540  7440          SZA
+  278 00541  5344          JMP     GETSR           /NO
+  279 00542  7040          CMA                     /YES
+  280 00543  3016          DCA     ERR             /SET ERROR
+  281                      
+  282 00544  7300  GETSR,  CLA CLL
+  283 00545  7404          OSR                     /GET SR
+  284 00546  7010          RAR                     /SR11 = ADDR/~INSTR
+  285 00547  7420          SNL                     /WAS IT 1?
+  286 00550  5355          JMP     LOOP1           /NO, PUT ADDRESS IN Q
+  287 00551  7200          CLA
+  288 00552  1005          TAD     OPCODE
+  289 00553  7421          MQL                     /PUT OPCODE IN Q
+  290 00554  5766@         JMP     LOOP2
+  291                      
+  292 00555  7200  LOOP1,  CLA
+
+
+
+      /HP-35 EMULATOR                                                     Page 7
+
+
+  293 00556  1022          TAD     ADDR            /GET ADDRESS
+  294 00557  7421          MQL                     /PUT ADDRESS IN Q
+  295 00560  5766@         JMP     LOOP2
+  296                      
+      00566  0600
+      00567  7501
+      00570  6000
+      00571  0200
+      00572  0130
+      00573  0164
+      00574  0004
+      00575  0010
+      00576  0050
+      00577  4000
+  297                      PAGE
+  298                      
+  299 00600  7404  LOOP2,  OSR
+  300 00601  0377          AND     (2000)          /SR10 = DEBUG MODE
+  301 00602  3032          DCA     DEBUG
+  302 00603  1032          TAD     DEBUG
+  303 00604  7450          SNA
+  304 00605  5223          JMP     LOOP3           /DEBUG MODE DISABLED
+  305                      
+  306 00606  7200  DEBUGP, CLA
+  307 00607  1142          TAD     [REGA]
+  308 00610  3026          DCA     REGTOP
+  309 00611  4776@         JMS     PRINTR
+  310 00612  1141          TAD     [REGB]
+  311 00613  3026          DCA     REGTOP
+  312 00614  4776@         JMS     PRINTR
+  313 00615  1140          TAD     [REGC]
+  314 00616  3026          DCA     REGTOP
+  315 00617  4776@         JMS     PRINTR
+  316 00620  1137          TAD     [REGD]
+  317 00621  3026          DCA     REGTOP
+  318 00622  4776@         JMS     PRINTR
+  319                      
+  320 00623  7404  LOOP3,  OSR                     /GET SR
+  321 00624  7004          RAL                     /SR0 = HALT
+  322 00625  7420          SNL                     /WAS IT 0?
+  323 00626  5243          JMP     INSDEC          /YES, CONTINUE
+  324 00627  7200          CLA
+  325 00630  1123          TAD     HLTINS
+  326 00631  7040          CMA
+  327 00632  7440          SZA                     /IS HLTINS 7777?
+  328 00633  5236          JMP     HLTOPC          /NO, HALT ON OPCODE
+  329 00634  7402  HLTNOW, HLT                     /YES, HALT NOW
+  330 00635  5243          JMP     INSDEC          /CONTINUE WITH DECODE
+  331 00636  7001  HLTOPC, IAC
+  332 00637  1005          TAD     OPCODE
+
+
+
+      /HP-35 EMULATOR                                                     Page 8
+
+
+  333 00640  7440          SZA                     /DOES HLTINS == OPCODE?
+  334 00641  5243          JMP     INSDEC          /NO, CONTINUE WITH DECODE
+  335 00642  5234          JMP     HLTNOW          /YES, HALT NOW
+  336                      
+  337                              /INSTRUCTION DECODE
+  338 00643  7200  INSDEC, CLA
+  339 00644  1005          TAD     OPCODE          /GET OPCODE
+  340 00645  1375          TAD     (INSTLU)/ADD BEGINNING OF TABLE
+  341 00646  3114          DCA     TEMP            /STORE ADDRESS
+  342 00647  1514          TAD I   TEMP            /GET SUBROUTINE ADDRESS
+  343 00650  3114          DCA     TEMP            /STORE ADDRESS
+  344 00651  4514          JMS I   TEMP            /JUMP TO SUBROUTINE
+  345 00652  5261          JMP     READKB          /READ KEYBOARD
+  346                      
+  347 00653  0000  PRINT,  0000                    /PRINT CHARACTER IN A
+  348 00654  6046          TLS
+  349 00655  6041          TSF
+  350 00656  5255          JMP     .-1
+  351 00657  7200          CLA
+  352 00660  5653          JMP I   PRINT
+  353                      
+  354                              /READ FROM KEYBOARD
+  355 00661  6031  READKB, KSF                     /KEY IN BUFFER?
+  356 00662  5340          JMP     CHKKEY          /NO, KEY HAS BEEN READ BEFORE?
+  357 00663  6036          KRB                     /READ KEY
+  358 00664  0374          AND     (0177)          /KEEP 7 BITS
+  359 00665  3023          DCA     KEYC            /STORE KEY IN KEYC
+  360 00666  1023          TAD     KEYC
+  361 00667  0373          AND     (0100)          /CHECK UPPER BIT OF KEY
+  362 00670  7440          SZA                     /IS IT 0?
+  363 00671  5314          JMP     DECOD1          /NO, DECODE ALPHA KEYS
+  364 00672  1023          TAD     KEYC
+  365 00673  0372          AND     (0040)          /CHECK NEXT BIT OF KEY
+  366 00674  7450          SNA                     /IS IT 1?
+  367 00675  5314          JMP     DECOD1          /NO, DECODE CONTROL KEYS
+  368 00676  7200          CLA
+  369 00677  1023          TAD     KEYC
+  370 00700  0371          AND     (0030)          /CHECK NEXT TWO BITS OF KEY
+  371 00701  7450          SNA                     /ARE THEY NOT 0?
+  372 00702  5335          JMP     INVKEY          /NOT A VALID KEY (04X)
+  373 00703  7200          CLA                     /05X, 06X AND 07X VALID
+  374 00704  1370          TAD     (-0010)         /SUBTRACT 010 FROM KEY CODE
+  375 00705  1023          TAD     KEYC
+  376 00706  0367          AND     (0037)
+  377 00707  1366          TAD     (NUMLU)         /ADD START OF TABLE
+  378 00710  3114          DCA     TEMP
+  379 00711  1514          TAD I   TEMP            /GET ACTUAL KEY CODE
+  380 00712  3023          DCA     KEYC            /SAVE IN KEY CODE
+  381 00713  5340          JMP     CHKKEY          /CONTINUE WITH DECODING
+  382 00714  7200  DECOD1, CLA
+
+
+
+      /HP-35 EMULATOR                                                     Page 9
+
+
+  383 00715  1365          TAD     (KEYLU-2)       /GET START OF TABLE - 2
+  384 00716  3010          DCA     INDEX1          /STORE IN AUTOINC INDEX
+  385 00717  1364          TAD     (-0025)         /20 KEYS LEFT TO DECODE, PLUS 1
+  386 00720  3025          DCA     SIZE
+  387 00721  2025  DECOLP, ISZ     SIZE
+  388 00722  7410          SKP                     /STILL HAVE KEYS LEFT
+  389 00723  5335          JMP     INVKEY          /NO MATCH
+  390 00724  7200          CLA
+  391 00725  2010          ISZ     INDEX1          /NEED TO INCREMENT BY 2
+  392 00726  1023          TAD     KEYC
+  393 00727  1410          TAD I   INDEX1
+  394 00730  7440          SZA                     /DO THE KEYS MATCH?
+  395 00731  5321          JMP     DECOLP          /NO, KEEP LOOPING
+  396 00732  1410          TAD I   INDEX1          /YES, GET THE NEXT WORD
+  397 00733  3023          DCA     KEYC            /STORE IN KEY CODE
+  398 00734  5340          JMP     CHKKEY          /GO ON WITH READING KEY
+  399 00735  7240  INVKEY, CLA CMA                 /INVALID KEY
+  400 00736  3023          DCA     KEYC            /KEY CODE = -1
+  401 00737  5763@         JMP     DISP            /CONTINUE WITH DISPLAY
+  402 00740  7200  CHKKEY, CLA
+  403 00741  1023          TAD     KEYC            /HAS KEY BEEN READ PREVIOUSLY?
+  404 00742  7510          SPA
+  405 00743  5763@         JMP     DISP            /NO, CONTINUE WITH DISPLAY
+  406 00744  3024          DCA     KEYR            /KEY ROM = KEY CODE
+  407 00745  7040          CMA
+  408 00746  3023          DCA     KEYC            /KEY CODE = -1
+  409 00747  1001          TAD     REGS
+  410 00750  0362          AND     (7776)
+  411 00751  3001          DCA     REGS
+  412 00752  2001          ISZ     REGS            /SET S[0]
+  413 00753  3016          DCA     ERR             /CLEAR ERROR
+  414 00754  5763@         JMP     DISP
+  415                      
+      00762  7776
+      00763  1000
+      00764  7753
+      00765  3626
+      00766  3600
+      00767  0037
+      00770  7770
+      00771  0030
+      00772  0040
+      00773  0100
+      00774  0177
+      00775  4000
+      00776  3132
+      00777  2000
+  416                      PAGE
+  417                      
+  418                              /DISPLAY
+
+
+
+      /HP-35 EMULATOR                                                    Page 10
+
+
+  419 01000  7200  DISP,   CLA
+  420 01001  1032          TAD     DEBUG
+  421 01002  7440          SZA
+  422 01003  5777@         JMP     LOOP            /DON'T PRINT DISPLAY IF DEBUG
+  423 01004  1012          TAD     DISPEN
+  424 01005  7450          SNA                     /IS DISPLAY ENABLED?
+  425 01006  5211          JMP     LPDISP          /NO, DOES DISP NEED UPDATE?
+  426 01007  3013          DCA     UPDATE          /DISPLAY UPDATE = TRUE
+  427 01010  5777@         JMP     LOOP            /BACK TO TOP
+  428                      
+  429 01011  1013  LPDISP, TAD     UPDATE
+  430 01012  7450          SNA                     /DOES DISP NEED UPDATE?
+  431 01013  5777@         JMP     LOOP            /NO, BACK TO TOP
+  432 01014  7200          CLA                     /YES, UPDATE DISPLAY
+  433 01015  3013          DCA     UPDATE          /DISPLAY UPDATE = FALSE
+  434 01016  1376          TAD     (0015)          /CARRIAGE RETURN
+  435 01017  4775@         JMS     PRINT           /PRINT A CR
+  436 01020  1374          TAD     (-0025)         /21 SPACES TO DISPLAY
+  437 01021  3025          DCA     SIZE
+  438 01022  1373  LPDIS1, TAD     (0040)          /SPACE
+  439 01023  4775@         JMS     PRINT           /PRINT A SPACE
+  440 01024  2025          ISZ     SIZE
+  441 01025  5222          JMP     LPDIS1          /PRINT ALL 21
+  442 01026  5227          JMP     PRCR            /PRINT CARRIAGE RETURN
+  443                      
+  444 01027  1376  PRCR,   TAD     (0015)          /CARRIAGE RETURN
+  445 01030  4775@         JMS     PRINT           /PRINT A CR
+  446 01031  1372          TAD     (-0016)         /PRINT REGISTER (14 DIGITS)
+  447 01032  3025          DCA     SIZE            /SIZE = -14
+  448 01033  7200  BIGLP,  CLA
+  449 01034  1025          TAD     SIZE            /A = SIZE
+  450 01035  7040          CMA                     /A = -SIZE - 1
+  451 01036  3027          DCA     REGIDX          /INDEX FROM 13 TO 0
+  452 01037  1141          TAD     [REGB]
+  453 01040  3026          DCA     REGTOP
+  454 01041  4771@         JMS     GETAT
+  455 01042  1031          TAD     ATIO
+  456 01043  0370          AND     (0010)
+  457 01044  7450          SNA                     /B[I] >= 8?
+  458 01045  5252          JMP     LPDIS2          /NO, CONTINUE
+  459 01046  7200          CLA
+  460 01047  1373          TAD     (0040)          /SPACE
+  461 01050  4775@         JMS     PRINT           /PRINT A SPACE
+  462 01051  5316          JMP     LPDIS9          /CONTINUE WITH FOR LOOP
+  463                      
+  464 01052  1367  LPDIS2, TAD     (-0002)         /IS INDEX 2?
+  465 01053  1027          TAD     REGIDX
+  466 01054  7450          SNA                     /NO?
+  467 01055  5261          JMP     LPDIS3          /YES, PRINT '-' OR SPACE NOW
+  468 01056  1366          TAD     (-0013)         /HOW ABOUT 13 DECIMAL? (02 + 013)
+
+
+
+      /HP-35 EMULATOR                                                    Page 11
+
+
+  469 01057  7440          SZA
+  470 01060  5276          JMP     LPDIS4          /NOT 2 OR 13, SO TIME TO PRINT NUMBER   
+  471 01061  1142  LPDIS3, TAD     [REGA]          /PRINT A '-' OR SPACE
+  472 01062  3026          DCA     REGTOP
+  473 01063  4771@         JMS     GETAT
+  474 01064  1031          TAD     ATIO
+  475 01065  0370          AND     (0010)          /IS A[I] >= 8?
+  476 01066  7440          SZA
+  477 01067  5272          JMP     LPDIS5          /YES, PRINT A '-'
+  478 01070  1373          TAD     (0040)          /NO, PRINT A SPACE
+  479 01071  5274          JMP     LPDIS6          /PRINT IT       
+  480 01072  7200  LPDIS5, CLA
+  481 01073  1365          TAD     (0055)          /'-'
+  482 01074  4775@ LPDIS6, JMS     PRINT           /PRINT IT
+  483 01075  5305          JMP     LPDIS7          /SEE IF '.' NEEDS PRINTING
+  484              
+  485 01076  7200  LPDIS4, CLA                     /PRINT NUMBER
+  486 01077  1142          TAD     [REGA]
+  487 01100  3026          DCA     REGTOP
+  488 01101  4771@         JMS     GETAT
+  489 01102  1031          TAD     ATIO
+  490 01103  1364          TAD     (0060)          /ADD '0'
+  491 01104  4775@         JMS     PRINT           /PRINT IT
+  492 01105  1141  LPDIS7, TAD     [REGB]          /PRINT '.'?
+  493 01106  3026          DCA     REGTOP
+  494 01107  4771@         JMS     GETAT
+  495 01110  1367          TAD     (-0002)         /IS B[I] == 2?
+  496 01111  1031          TAD     ATIO
+  497 01112  7440          SZA
+  498 01113  5316          JMP     LPDIS9          /NO, CONTINUE
+  499 01114  1363          TAD     (0056)          /YES, PRINT '.'
+  500 01115  4775@         JMS     PRINT           /PRINT IT
+  501 01116  2025  LPDIS9, ISZ     SIZE
+  502 01117  5233          JMP     BIGLP           /CONTINUE WITH FOR LOOP
+  503 01120  7200  LPDIS8, CLA                     /ERROR?
+  504 01121  1016          TAD     ERR
+  505 01122  7450          SNA
+  506 01123  5777@         JMP     LOOP            /NO ERROR, BACK TO TOP
+  507 01124  7200          CLA
+  508 01125  1362          TAD     (-0006)         /PRINT " ERROR"
+  509 01126  3025          DCA     SIZE
+  510 01127  1361          TAD     (ERRMSG-1)
+  511 01130  3010          DCA     INDEX1
+  512 01131  1410  ERRLP,  TAD I   INDEX1
+  513 01132  4775@         JMS     PRINT
+  514 01133  2025          ISZ     SIZE
+  515 01134  5331          JMP     ERRLP           /KEEP PRINTING
+  516 01135  5777@         JMP     LOOP            /BACK TO TOP
+  517              
+  518 01136  0040  ERRMSG, 0040                    /' '
+
+
+
+      /HP-35 EMULATOR                                                    Page 12
+
+
+  519 01137  0105          0105                    /'E'
+  520 01140  0122          0122                    /'R'
+  521 01141  0122          0122                    /'R'
+  522 01142  0117          0117                    /'O'
+  523 01143  0122          0122                    /'R'
+  524                      
+      01161  1135
+      01162  7772
+      01163  0056
+      01164  0060
+      01165  0055
+      01166  7765
+      01167  7776
+      01170  0010
+      01171  2636
+      01172  7762
+      01173  0040
+      01174  7753
+      01175  0653
+      01176  0015
+      01177  0514
+  525                      PAGE
+  526              
+  527 01200  0000  OPNOP,  0000                    /NO OPERATION
+  528 01201  5600          JMP I   OPNOP
+  529                      
+  530 01202  0000  ERROR,  0000
+  531 01203  7402          HLT
+  532 01204  5602          JMP I   ERROR
+  533                      
+  534 01205  0000  ARITH,  0000
+  535 01206  7300          CLA CLL
+  536 01207  4777@         JMS     GETFL           /GET FIRST AND LAST
+  537 01210  3014          DCA     CARRY           /CLEAR CARRY
+  538 01211  3115          DCA     BYTE1           /CLEAR BYTE1
+  539 01212  1005          TAD     OPCODE
+  540 01213  7012          RTR
+  541 01214  7012          RTR
+  542 01215  7010          RAR
+  543 01216  0376          AND     (0037)          /SHIFT RIGHT 5
+  544 01217  3000          DCA     DECODE          /GET AR OPERATION
+  545 01220  1000          TAD     DECODE          /SET CARRY IF BOTTOM TWO BITS SET
+  546 01221  0375          AND     (0003)
+  547 01222  7041          CMA IAC
+  548 01223  1375          TAD     (0003)
+  549 01224  7440          SZA                     /ARE BOTTOM TWO SET?
+  550 01225  5230          JMP     ARITH1          /NO
+  551 01226  7240          CLA CMA                 /YES,
+  552 01227  3014          DCA     CARRY           /SET CARRY
+  553 01230  7200  ARITH1, CLA                     /INITIALIZE INDEX
+
+
+
+      /HP-35 EMULATOR                                                    Page 13
+
+
+  554 01231  1006          TAD     FIRST
+  555 01232  3027          DCA     REGIDX          /SET INDEX TO FIRST
+  556 01233  7200  ARITH2, CLA
+  557 01234  1374          TAD     (ARLOOK)
+  558 01235  1000          TAD     DECODE
+  559 01236  3114          DCA     TEMP
+  560 01237  1514          TAD I   TEMP
+  561 01240  3114          DCA     TEMP
+  562 01241  4514          JMS I   TEMP
+  563 01242  2027          ISZ     REGIDX          /INCREMENT INDEX
+  564 01243  7200          CLA
+  565 01244  1027          TAD     REGIDX          /IS INDEX == LAST + 1?
+  566 01245  7041          CMA IAC
+  567 01246  1007          TAD     LAST
+  568 01247  7001          IAC
+  569 01250  7440          SZA
+  570 01251  5233          JMP     ARITH2          /NO, CONTINUE
+  571 01252  5605          JMP I   ARITH           /YES, RETURN
+  572 01253  1313  ARLOOK, AR00
+  573 01254  1323          AR01
+  574 01255  1331          AR02
+  575 01256  1346          AR03
+  576 01257  1400          AR04
+  577 01260  1410          AR05
+  578 01261  1424          AR06
+  579 01262  1432          AR07
+  580 01263  1446          AR08
+  581 01264  1462          AR09
+  582 01265  1472          AR0A
+  583 01266  1512          AR0B
+  584 01267  1526          AR0C
+  585 01270  1536          AR0D
+  586 01271  1546          AR0E
+  587 01272  1600          AR0F
+  588 01273  1614          AR10
+  589 01274  1631          AR11
+  590 01275  1653          AR12
+  591 01276  1676          AR13
+  592 01277  1710          AR14
+  593 01300  1733          AR15
+  594 01301  1750          AR16
+  595 01302  2000          AR17
+  596 01303  2007          AR18
+  597 01304  2027          AR19
+  598 01305  2051          AR1A
+  599 01306  2071          AR1B
+  600 01307  2105          AR1C
+  601 01310  2200          AR1D
+  602 01311  2222          AR1E
+  603 01312  2242          AR1F
+
+
+
+      /HP-35 EMULATOR                                                    Page 14
+
+
+  604              
+  605 01313  0000  AR00,   0000                    /0 + B
+  606 01314  1141          TAD     [REGB]
+  607 01315  3026          DCA     REGTOP
+  608 01316  4773@         JMS     GETAT
+  609 01317  1014          TAD     CARRY
+  610 01320  1031          TAD     ATIO
+  611 01321  3014          DCA     CARRY
+  612 01322  5713          JMP I   AR00
+  613                      
+  614 01323  0000  AR01,   0000                    /B = 0
+  615 01324  1141          TAD     [REGB]
+  616 01325  3026          DCA     REGTOP
+  617 01326  3031          DCA     ATIO
+  618 01327  4772@         JMS     STORAT
+  619 01330  5723          JMP I   AR01
+  620                      
+  621 01331  0000  AR02,   0000                    /A - C
+  622 01332  1142          TAD     [REGA]
+  623 01333  3026          DCA     REGTOP
+  624 01334  4773@         JMS     GETAT
+  625 01335  1031          TAD     ATIO
+  626 01336  3115          DCA     BYTE1
+  627 01337  1140          TAD     [REGC]
+  628 01340  3026          DCA     REGTOP
+  629 01341  4773@         JMS     GETAT
+  630 01342  1031          TAD     ATIO
+  631 01343  3116          DCA     BYTE2
+  632 01344  4771@         JMS     DOSUB
+  633 01345  5731          JMP I   AR02
+  634                      
+  635 01346  0000  AR03,   0000                    /C - 1
+  636 01347  1140          TAD     [REGC]
+  637 01350  3026          DCA     REGTOP
+  638 01351  4773@         JMS     GETAT
+  639 01352  1031          TAD     ATIO
+  640 01353  7450          SNA
+  641 01354  5746          JMP I   AR03
+  642 01355  7200          CLA
+  643 01356  3014          DCA     CARRY
+  644 01357  5746          JMP I   AR03
+  645                      
+      01371  2400
+      01372  2652
+      01373  2636
+      01374  1253
+      01375  0003
+      01376  0037
+      01377  2256
+  646                      PAGE
+
+
+
+      /HP-35 EMULATOR                                                    Page 15
+
+
+  647                      
+  648 01400  0000  AR04,   0000                    /C = B
+  649 01401  1141          TAD     [REGB]
+  650 01402  3026          DCA     REGTOP
+  651 01403  4777@         JMS     GETAT
+  652 01404  1140          TAD     [REGC]
+  653 01405  3026          DCA     REGTOP
+  654 01406  4776@         JMS     STORAT
+  655 01407  5600          JMP I   AR04
+  656                      
+  657 01410  0000  AR05,   0000                    /C = 0 - C
+  658 01411  1140          TAD     [REGC]
+  659 01412  3026          DCA     REGTOP
+  660 01413  4777@         JMS     GETAT
+  661 01414  1031          TAD     ATIO
+  662 01415  3116          DCA     BYTE2
+  663 01416  3115          DCA     BYTE1
+  664 01417  4775@         JMS     DOSUB
+  665 01420  1117          TAD     RESULT
+  666 01421  3031          DCA     ATIO
+  667 01422  4776@         JMS     STORAT
+  668 01423  5610          JMP I   AR05
+  669                      
+  670 01424  0000  AR06,   0000                    /C = 0
+  671 01425  1140          TAD     [REGC]
+  672 01426  3026          DCA     REGTOP
+  673 01427  3031          DCA     ATIO
+  674 01430  4776@         JMS     STORAT
+  675 01431  5624          JMP I   AR06
+  676                      
+  677 01432  0000  AR07,   0000                    /C = 0 - C - 1
+  678 01433  1140          TAD     [REGC]
+  679 01434  3026          DCA     REGTOP
+  680 01435  4777@         JMS     GETAT
+  681 01436  1031          TAD     ATIO
+  682 01437  3116          DCA     BYTE2
+  683 01440  3115          DCA     BYTE1
+  684 01441  4775@         JMS     DOSUB
+  685 01442  1117          TAD     RESULT
+  686 01443  3031          DCA     ATIO
+  687 01444  4776@         JMS     STORAT
+  688 01445  5632          JMP I   AR07
+  689                      
+  690 01446  0000  AR08,   0000                    /SHIFT LEFT A
+  691 01447  1142          TAD     [REGA]
+  692 01450  3026          DCA     REGTOP
+  693 01451  4777@         JMS     GETAT
+  694 01452  1031          TAD     ATIO
+  695 01453  3116          DCA     BYTE2
+  696 01454  1115          TAD     BYTE1
+
+
+
+      /HP-35 EMULATOR                                                    Page 16
+
+
+  697 01455  3031          DCA     ATIO
+  698 01456  4776@         JMS     STORAT
+  699 01457  1116          TAD     BYTE2
+  700 01460  3115          DCA     BYTE1
+  701 01461  5646          JMP I   AR08
+  702                      
+  703 01462  0000  AR09,   0000                    /B = A
+  704 01463  1142          TAD     [REGA]
+  705 01464  3026          DCA     REGTOP
+  706 01465  4777@         JMS     GETAT
+  707 01466  1141          TAD     [REGB]
+  708 01467  3026          DCA     REGTOP
+  709 01470  4776@         JMS     STORAT
+  710 01471  5662          JMP I   AR09
+  711                      
+  712 01472  0000  AR0A,   0000                    /C = A - C
+  713 01473  1142          TAD     [REGA]
+  714 01474  3026          DCA     REGTOP
+  715 01475  4777@         JMS     GETAT
+  716 01476  1031          TAD     ATIO
+  717 01477  3115          DCA     BYTE1
+  718 01500  1140          TAD     [REGC]
+  719 01501  3026          DCA     REGTOP
+  720 01502  4777@         JMS     GETAT
+  721 01503  1031          TAD     ATIO
+  722 01504  3116          DCA     BYTE2
+  723 01505  4775@         JMS     DOSUB
+  724 01506  1117          TAD     RESULT
+  725 01507  3031          DCA     ATIO
+  726 01510  4776@         JMS     STORAT
+  727 01511  5672          JMP I   AR0A
+  728                      
+  729 01512  0000  AR0B,   0000                    /C = C - 1
+  730 01513  1140          TAD     [REGC]
+  731 01514  3026          DCA     REGTOP
+  732 01515  3116          DCA     BYTE2
+  733 01516  4777@         JMS     GETAT
+  734 01517  1031          TAD     ATIO
+  735 01520  3115          DCA     BYTE1
+  736 01521  4775@         JMS     DOSUB
+  737 01522  1117          TAD     RESULT
+  738 01523  3031          DCA     ATIO
+  739 01524  4776@         JMS     STORAT
+  740 01525  5712          JMP I   AR0B
+  741                      
+  742 01526  0000  AR0C,   0000                    /A = C
+  743 01527  1140          TAD     [REGC]
+  744 01530  3026          DCA     REGTOP
+  745 01531  4777@         JMS     GETAT
+  746 01532  1142          TAD     [REGA]
+
+
+
+      /HP-35 EMULATOR                                                    Page 17
+
+
+  747 01533  3026          DCA     REGTOP
+  748 01534  4776@         JMS     STORAT
+  749 01535  5726          JMP I   AR0C
+  750                      
+  751 01536  0000  AR0D,   0000                    /0 - C
+  752 01537  1140          TAD     [REGC]
+  753 01540  3026          DCA     REGTOP
+  754 01541  4777@         JMS     GETAT
+  755 01542  1031          TAD     ATIO
+  756 01543  1014          TAD     CARRY
+  757 01544  3014          DCA     CARRY
+  758 01545  5736          JMP I   AR0D
+  759                      
+  760 01546  0000  AR0E,   0000                    /C = A + C
+  761 01547  1142          TAD     [REGA]
+  762 01550  3026          DCA     REGTOP
+  763 01551  4777@         JMS     GETAT
+  764 01552  1031          TAD     ATIO
+  765 01553  3115          DCA     BYTE1
+  766 01554  1140          TAD     [REGC]
+  767 01555  3026          DCA     REGTOP
+  768 01556  4777@         JMS     GETAT
+  769 01557  1031          TAD     ATIO
+  770 01560  3116          DCA     BYTE2
+  771 01561  4774@         JMS     DOADD
+  772 01562  1117          TAD     RESULT
+  773 01563  3031          DCA     ATIO
+  774 01564  4776@         JMS     STORAT
+  775 01565  5746          JMP I   AR0E
+  776                      
+      01574  2327
+      01575  2400
+      01576  2652
+      01577  2636
+  777                      PAGE
+  778                      
+  779 01600  0000  AR0F,   0000                    /C = C + 1
+  780 01601  1140          TAD     [REGC]
+  781 01602  3026          DCA     REGTOP
+  782 01603  4777@         JMS     GETAT
+  783 01604  1031          TAD     ATIO
+  784 01605  3115          DCA     BYTE1
+  785 01606  3116          DCA     BYTE2
+  786 01607  4776@         JMS     DOADD
+  787 01610  1117          TAD     RESULT
+  788 01611  3031          DCA     ATIO
+  789 01612  4775@         JMS     STORAT
+  790 01613  5600          JMP I   AR0F
+  791                      
+  792 01614  0000  AR10,   0000                    /A - B
+
+
+
+      /HP-35 EMULATOR                                                    Page 18
+
+
+  793 01615  1142          TAD     [REGA]
+  794 01616  3026          DCA     REGTOP
+  795 01617  4777@         JMS     GETAT
+  796 01620  1031          TAD     ATIO
+  797 01621  3115          DCA     BYTE1
+  798 01622  1141          TAD     [REGB]
+  799 01623  3026          DCA     REGTOP
+  800 01624  4777@         JMS     GETAT
+  801 01625  1031          TAD     ATIO
+  802 01626  3116          DCA     BYTE2
+  803 01627  4774@         JMS     DOSUB
+  804 01630  5614          JMP I   AR10
+  805                      
+  806 01631  0000  AR11,   0000                    /B <> C
+  807 01632  1141          TAD     [REGB]
+  808 01633  3026          DCA     REGTOP
+  809 01634  4777@         JMS     GETAT
+  810 01635  1031          TAD     ATIO
+  811 01636  3115          DCA     BYTE1
+  812 01637  1140          TAD     [REGC]
+  813 01640  3026          DCA     REGTOP
+  814 01641  4777@         JMS     GETAT
+  815 01642  1141          TAD     [REGB]
+  816 01643  3026          DCA     REGTOP
+  817 01644  4775@         JMS     STORAT
+  818 01645  1115          TAD     BYTE1
+  819 01646  3031          DCA     ATIO
+  820 01647  1140          TAD     [REGC]
+  821 01650  3026          DCA     REGTOP
+  822 01651  4775@         JMS     STORAT
+  823 01652  5631          JMP I   AR11
+  824                      
+  825 01653  0000  AR12,   0000                    /SHIFT RIGHT C
+  826 01654  1140          TAD     [REGC]
+  827 01655  3026          DCA     REGTOP
+  828 01656  1027          TAD     REGIDX
+  829 01657  7041          CMA IAC
+  830 01660  1007          TAD     LAST
+  831 01661  7440          SZA
+  832 01662  5266          JMP     AR121
+  833 01663  3031          DCA     ATIO
+  834 01664  4775@ AR122,  JMS     STORAT
+  835 01665  5653          JMP I   AR12
+  836 01666  7200  AR121,  CLA
+  837 01667  1027          TAD     REGIDX
+  838 01670  3114          DCA     TEMP
+  839 01671  2027          ISZ     REGIDX
+  840 01672  4777@         JMS     GETAT
+  841 01673  1114          TAD     TEMP
+  842 01674  3027          DCA     REGIDX
+
+
+
+      /HP-35 EMULATOR                                                    Page 19
+
+
+  843 01675  5264          JMP     AR122
+  844                      
+  845 01676  0000  AR13,   0000                    /A - 1
+  846 01677  1142          TAD     [REGA]
+  847 01700  3026          DCA     REGTOP
+  848 01701  4777@         JMS     GETAT
+  849 01702  1031          TAD     ATIO
+  850 01703  7450          SNA
+  851 01704  5676          JMP I   AR13
+  852 01705  7200          CLA
+  853 01706  3014          DCA     CARRY
+  854 01707  5676          JMP I   AR13
+  855                      
+  856 01710  0000  AR14,   0000                    /SHIFT RIGHT B
+  857 01711  1141          TAD     [REGB]
+  858 01712  3026          DCA     REGTOP
+  859 01713  1027          TAD     REGIDX
+  860 01714  7041          CMA IAC
+  861 01715  1007          TAD     LAST
+  862 01716  7440          SZA
+  863 01717  5323          JMP     AR141
+  864 01720  3031          DCA     ATIO
+  865 01721  4775@ AR142,  JMS     STORAT
+  866 01722  5710          JMP I   AR14
+  867 01723  7200  AR141,  CLA
+  868 01724  1027          TAD     REGIDX
+  869 01725  3114          DCA     TEMP
+  870 01726  2027          ISZ     REGIDX
+  871 01727  4777@         JMS     GETAT
+  872 01730  1114          TAD     TEMP
+  873 01731  3027          DCA     REGIDX
+  874 01732  5321          JMP     AR142
+  875                      
+  876 01733  0000  AR15,   0000                    /C = C + C
+  877 01734  1140          TAD     [REGC]
+  878 01735  3026          DCA     REGTOP
+  879 01736  4777@         JMS     GETAT
+  880 01737  1031          TAD     ATIO
+  881 01740  3115          DCA     BYTE1
+  882 01741  1031          TAD     ATIO
+  883 01742  3116          DCA     BYTE2
+  884 01743  4776@         JMS     DOADD
+  885 01744  1117          TAD     RESULT
+  886 01745  3031          DCA     ATIO
+  887 01746  4775@         JMS     STORAT
+  888 01747  5733          JMP I   AR15
+  889                      
+  890 01750  0000  AR16,   0000                    /SHIFT RIGHT A
+  891 01751  1142          TAD     [REGA]
+  892 01752  3026          DCA     REGTOP
+
+
+
+      /HP-35 EMULATOR                                                    Page 20
+
+
+  893 01753  1027          TAD     REGIDX
+  894 01754  7041          CMA IAC
+  895 01755  1007          TAD     LAST
+  896 01756  7440          SZA
+  897 01757  5363          JMP     AR161
+  898 01760  3031          DCA     ATIO
+  899 01761  4775@ AR162,  JMS     STORAT
+  900 01762  5750          JMP I   AR16
+  901 01763  7200  AR161,  CLA
+  902 01764  1027          TAD     REGIDX
+  903 01765  3114          DCA     TEMP
+  904 01766  2027          ISZ     REGIDX
+  905 01767  4777@         JMS     GETAT
+  906 01770  1114          TAD     TEMP
+  907 01771  3027          DCA     REGIDX
+  908 01772  5361          JMP     AR162
+  909                      
+      01774  2400
+      01775  2652
+      01776  2327
+      01777  2636
+  910                      PAGE
+  911                      
+  912 02000  0000  AR17,   0000                    /A = 0
+  913 02001  1142          TAD     [REGA]
+  914 02002  3026          DCA     REGTOP
+  915 02003  3014          DCA     CARRY
+  916 02004  3031          DCA     ATIO
+  917 02005  4777@         JMS     STORAT
+  918 02006  5600          JMP I   AR17
+  919                      
+  920 02007  0000  AR18,   0000                    /A = A - B
+  921 02010  1141          TAD     [REGB]
+  922 02011  3026          DCA     REGTOP
+  923 02012  4776@         JMS     GETAT
+  924 02013  1031          TAD     ATIO
+  925 02014  3116          DCA     BYTE2
+  926 02015  1142          TAD     [REGA]
+  927 02016  3026          DCA     REGTOP
+  928 02017  4776@         JMS     GETAT
+  929 02020  1031          TAD     ATIO
+  930 02021  3115          DCA     BYTE1
+  931 02022  4775@         JMS     DOSUB
+  932 02023  1117          TAD     RESULT
+  933 02024  3031          DCA     ATIO
+  934 02025  4777@         JMS     STORAT
+  935 02026  5607          JMP I   AR18
+  936                      
+  937 02027  0000  AR19,   0000                    /A <> B
+  938 02030  1142          TAD     [REGA]
+
+
+
+      /HP-35 EMULATOR                                                    Page 21
+
+
+  939 02031  3026          DCA     REGTOP
+  940 02032  4776@         JMS     GETAT
+  941 02033  1031          TAD     ATIO
+  942 02034  3115          DCA     BYTE1
+  943 02035  1141          TAD     [REGB]
+  944 02036  3026          DCA     REGTOP
+  945 02037  4776@         JMS     GETAT
+  946 02040  1142          TAD     [REGA]
+  947 02041  3026          DCA     REGTOP
+  948 02042  4777@         JMS     STORAT
+  949 02043  1115          TAD     BYTE1
+  950 02044  3031          DCA     ATIO
+  951 02045  1141          TAD     [REGB]
+  952 02046  3026          DCA     REGTOP
+  953 02047  4777@         JMS     STORAT
+  954 02050  5627          JMP I   AR19
+  955                      
+  956 02051  0000  AR1A,   0000                    /A = A - C
+  957 02052  1140          TAD     [REGC]
+  958 02053  3026          DCA     REGTOP
+  959 02054  4776@         JMS     GETAT
+  960 02055  1031          TAD     ATIO
+  961 02056  3116          DCA     BYTE2
+  962 02057  1142          TAD     [REGA]
+  963 02060  3026          DCA     REGTOP
+  964 02061  4776@         JMS     GETAT
+  965 02062  1031          TAD     ATIO
+  966 02063  3115          DCA     BYTE1
+  967 02064  4775@         JMS     DOSUB
+  968 02065  1117          TAD     RESULT
+  969 02066  3031          DCA     ATIO
+  970 02067  4777@         JMS     STORAT
+  971 02070  5651          JMP I   AR1A
+  972                      
+  973 02071  0000  AR1B,   0000                    /A = A - 1
+  974 02072  1142          TAD     [REGA]
+  975 02073  3026          DCA     REGTOP
+  976 02074  3116          DCA     BYTE2
+  977 02075  4776@         JMS     GETAT
+  978 02076  1031          TAD     ATIO
+  979 02077  3115          DCA     BYTE1
+  980 02100  4775@         JMS     DOSUB
+  981 02101  1117          TAD     RESULT
+  982 02102  3031          DCA     ATIO
+  983 02103  4777@         JMS     STORAT
+  984 02104  5671          JMP I   AR1B
+  985                      
+  986 02105  0000  AR1C,   0000                    /A = A + B
+  987 02106  1141          TAD     [REGB]
+  988 02107  3026          DCA     REGTOP
+
+
+
+      /HP-35 EMULATOR                                                    Page 22
+
+
+  989 02110  4776@         JMS     GETAT
+  990 02111  1031          TAD     ATIO
+  991 02112  3116          DCA     BYTE2
+  992 02113  1142          TAD     [REGA]
+  993 02114  3026          DCA     REGTOP
+  994 02115  4776@         JMS     GETAT
+  995 02116  1031          TAD     ATIO
+  996 02117  3115          DCA     BYTE1
+  997 02120  4774@         JMS     DOADD
+  998 02121  1117          TAD     RESULT
+  999 02122  3031          DCA     ATIO
+ 1000 02123  4777@         JMS     STORAT
+ 1001 02124  5705          JMP I   AR1C
+ 1002                      
+      02174  2327
+      02175  2400
+      02176  2636
+      02177  2652
+ 1003                      PAGE
+ 1004                      
+ 1005 02200  0000  AR1D,   0000                    /A <> C
+ 1006 02201  1142          TAD     [REGA]
+ 1007 02202  3026          DCA     REGTOP
+ 1008 02203  4777@         JMS     GETAT
+ 1009 02204  1031          TAD     ATIO
+ 1010 02205  3115          DCA     BYTE1
+ 1011 02206  1140          TAD     [REGC]
+ 1012 02207  3026          DCA     REGTOP
+ 1013 02210  4777@         JMS     GETAT
+ 1014 02211  1142          TAD     [REGA]
+ 1015 02212  3026          DCA     REGTOP
+ 1016 02213  4776@         JMS     STORAT
+ 1017 02214  1115          TAD     BYTE1
+ 1018 02215  3031          DCA     ATIO
+ 1019 02216  1140          TAD     [REGC]
+ 1020 02217  3026          DCA     REGTOP
+ 1021 02220  4776@         JMS     STORAT
+ 1022 02221  5600          JMP I   AR1D
+ 1023                      
+ 1024 02222  0000  AR1E,   0000                    /A = A + C
+ 1025 02223  1140          TAD     [REGC]
+ 1026 02224  3026          DCA     REGTOP
+ 1027 02225  4777@         JMS     GETAT
+ 1028 02226  1031          TAD     ATIO
+ 1029 02227  3116          DCA     BYTE2
+ 1030 02230  1142          TAD     [REGA]
+ 1031 02231  3026          DCA     REGTOP
+ 1032 02232  4777@         JMS     GETAT
+ 1033 02233  1031          TAD     ATIO
+ 1034 02234  3115          DCA     BYTE1
+
+
+
+      /HP-35 EMULATOR                                                    Page 23
+
+
+ 1035 02235  4327          JMS     DOADD
+ 1036 02236  1117          TAD     RESULT
+ 1037 02237  3031          DCA     ATIO
+ 1038 02240  4776@         JMS     STORAT
+ 1039 02241  5622          JMP I   AR1E
+ 1040                      
+ 1041 02242  0000  AR1F,   0000                    /A = A + 1
+ 1042 02243  1142          TAD     [REGA]
+ 1043 02244  3026          DCA     REGTOP
+ 1044 02245  3116          DCA     BYTE2
+ 1045 02246  4777@         JMS     GETAT
+ 1046 02247  1031          TAD     ATIO
+ 1047 02250  3115          DCA     BYTE1
+ 1048 02251  4327          JMS     DOADD
+ 1049 02252  1117          TAD     RESULT
+ 1050 02253  3031          DCA     ATIO
+ 1051 02254  4776@         JMS     STORAT
+ 1052 02255  5642          JMP I   AR1F
+ 1053                      
+ 1054 02256  0000  GETFL,  0000
+ 1055 02257  7300          CLA CLL
+ 1056 02260  1005          TAD     OPCODE
+ 1057 02261  0136          AND     [0034]          /ONLY KEEP FL PORTION
+ 1058 02262  7012          RTR
+ 1059 02263  3000          DCA     DECODE          /SAVE IN DECODE
+ 1060 02264  1000          TAD     DECODE
+ 1061 02265  7440          SZA                     /IS IT ZERO?
+ 1062 02266  5274          JMP     GETFL1          /NOT ZERO
+ 1063 02267  1002          TAD     P
+ 1064 02270  3006          DCA     FIRST
+ 1065 02271  1002          TAD     P
+ 1066 02272  3007          DCA     LAST
+ 1067 02273  5656          JMP I   GETFL
+ 1068 02274  7012  GETFL1, RTR
+ 1069 02275  7010          RAR
+ 1070 02276  7440          SZA                     /IS IT 4?
+ 1071 02277  5304          JMP     GETFL2          /NOT 4
+ 1072 02300  3006          DCA     FIRST
+ 1073 02301  1002          TAD     P
+ 1074 02302  3007          DCA     LAST
+ 1075 02303  5656          JMP I   GETFL
+ 1076 02304  7200  GETFL2, CLA
+ 1077 02305  1000          TAD     DECODE
+ 1078 02306  1375          TAD     (FL1-1)
+ 1079 02307  3000          DCA     DECODE
+ 1080 02310  1400          TAD I   DECODE
+ 1081 02311  0135          AND     [0017]
+ 1082 02312  3007          DCA     LAST
+ 1083 02313  1400          TAD I   DECODE
+ 1084 02314  7002          BSW
+
+
+
+      /HP-35 EMULATOR                                                    Page 24
+
+
+ 1085 02315  0135          AND     [0017]
+ 1086 02316  3006          DCA     FIRST
+ 1087 02317  5656          JMP I   GETFL
+ 1088 02320  0314  FL1,    0314
+ 1089 02321  0002  FL2,    0002
+ 1090 02322  0015  FL3,    0015
+ 1091 02323  0000          0000
+ 1092 02324  0315  FL5,    0315
+ 1093 02325  0202  FL6,    0202
+ 1094 02326  1515  FL7,    1515
+ 1095                      
+ 1096 02327  0000  DOADD,  0000
+ 1097 02330  7300          CLA CLL
+ 1098 02331  1115          TAD     BYTE1
+ 1099 02332  1116          TAD     BYTE2
+ 1100 02333  3117          DCA     RESULT
+ 1101 02334  1014          TAD     CARRY           /IS CARRY SET?
+ 1102 02335  7440          SZA
+ 1103 02336  2117          ISZ     RESULT          /INCREMENT IF CARRY
+ 1104 02337  7200          CLA
+ 1105 02340  1117          TAD     RESULT
+ 1106 02341  1374          TAD     (-0012)
+ 1107 02342  7510          SPA                     /RESULT < 0?
+ 1108 02343  5350          JMP     DOADD1          /NO
+ 1109 02344  3117          DCA     RESULT
+ 1110 02345  7040          CMA
+ 1111 02346  3014  DOADD2, DCA     CARRY
+ 1112 02347  5727          JMP I   DOADD
+ 1113 02350  7200  DOADD1, CLA
+ 1114 02351  5346          JMP     DOADD2
+ 1115                      
+      02374  7766
+      02375  2317
+      02376  2652
+      02377  2636
+ 1116                      PAGE
+ 1117                      
+ 1118 02400  0000  DOSUB,  0000
+ 1119 02401  7300          CLA CLL
+ 1120 02402  1014          TAD     CARRY
+ 1121 02403  7450          SNA
+ 1122 02404  5206          JMP     DOSUB1          /NO CARRY
+ 1123 02405  7201          CLA IAC
+ 1124 02406  1116  DOSUB1, TAD     BYTE2           /ADD CARRY TO Y
+ 1125 02407  7041          CMA IAC                 /TWO'S COMPLEMENT (CARRY + Y)
+ 1126 02410  1115          TAD     BYTE1           /A = X - Y - CARRY
+ 1127 02411  3117          DCA     RESULT
+ 1128 02412  1117          TAD     RESULT
+ 1129 02413  7500          SMA                     /RESULT NEGATIVE?
+ 1130 02414  5221          JMP     DOSUB2          /NO
+
+
+
+      /HP-35 EMULATOR                                                    Page 25
+
+
+ 1131 02415  1377          TAD     (0012)          /YES, ADD 10 TO RESULT
+ 1132 02416  3117          DCA     RESULT
+ 1133 02417  7240          CLA CMA                 /SET CARRY
+ 1134 02420  5222          JMP     DOSUB3
+ 1135 02421  7200  DOSUB2, CLA                     /CLEAR CARRY
+ 1136 02422  3014  DOSUB3, DCA     CARRY
+ 1137 02423  5600          JMP I   DOSUB
+ 1138                      
+ 1139 02424  0000  JSB,    0000                    /JUMP TO SUBROUTINE
+ 1140 02425  7300          CLA CLL
+ 1141 02426  1020          TAD     PC
+ 1142 02427  3004          DCA     RET             /RET = PC
+ 1143 02430  1005          TAD     OPCODE
+ 1144 02431  7012          RTR                     /GET TOP 8 BITS OF OPCODE
+ 1145 02432  0143          AND     [0377]
+ 1146 02433  3020          DCA     PC
+ 1147 02434  1021          TAD     DELROM
+ 1148 02435  3003          DCA     ROM
+ 1149 02436  5624          JMP I   JSB
+ 1150                      
+ 1151 02437  0000  GOTO,   0000
+ 1152 02440  7200          CLA
+ 1153 02441  1015          TAD     PCARRY
+ 1154 02442  7440          SZA
+ 1155 02443  5637          JMP I   GOTO
+ 1156 02444  7300          CLA CLL
+ 1157 02445  1005          TAD     OPCODE          /SHIFT OPCODE RIGHT 2
+ 1158 02446  7012          RTR
+ 1159 02447  0143          AND     [0377]
+ 1160 02450  3020          DCA     PC
+ 1161 02451  1021          TAD     DELROM
+ 1162 02452  3003          DCA     ROM
+ 1163 02453  5637          JMP I   GOTO
+ 1164                      
+ 1165 02454  0000  SELROM, 0000
+ 1166 02455  7300          CLA CLL
+ 1167 02456  1005          TAD     OPCODE
+ 1168 02457  7006          RTL
+ 1169 02460  7006          RTL
+ 1170 02461  7006          RTL
+ 1171 02462  0134          AND     [0007]
+ 1172 02463  3003          DCA     ROM
+ 1173 02464  1003          TAD     ROM
+ 1174 02465  3021          DCA     DELROM
+ 1175 02466  5654          JMP I   SELROM
+ 1176                      
+ 1177 02467  0000  SETP,   0000
+ 1178 02470  4776@         JMS     TPFOUR
+ 1179 02471  3002          DCA     P               /P = TOP FOUR OF OPCODE
+ 1180 02472  5667          JMP I   SETP
+
+
+
+      /HP-35 EMULATOR                                                    Page 26
+
+
+ 1181                      
+ 1182 02473  0000  DSROM,  0000
+ 1183 02474  7300          CLA CLL
+ 1184 02475  1005          TAD     OPCODE
+ 1185 02476  7006          RTL
+ 1186 02477  7006          RTL
+ 1187 02500  7006          RTL
+ 1188 02501  0134          AND     [0007]
+ 1189 02502  3021          DCA     DELROM
+ 1190 02503  5673          JMP I   DSROM
+ 1191                      
+ 1192 02504  0000  LDCONS, 0000
+ 1193 02505  1002          TAD     P
+ 1194 02506  1375          TAD     (-0016)
+ 1195 02507  7500          SMA
+ 1196 02510  5320          JMP     LDCST1
+ 1197 02511  4776@         JMS     TPFOUR
+ 1198 02512  3031          DCA     ATIO
+ 1199 02513  1002          TAD     P
+ 1200 02514  3027          DCA     REGIDX
+ 1201 02515  1140          TAD     [REGC]
+ 1202 02516  3026          DCA     REGTOP
+ 1203 02517  4774@         JMS     STORAT
+ 1204 02520  4773@ LDCST1, JMS     DECP
+ 1205 02521  5704          JMP I   LDCONS
+ 1206                      
+ 1207 02522  0000  SETS,   0000
+ 1208 02523  4776@         JMS     TPFOUR
+ 1209 02524  7040          CMA                     /NEGATE IT
+ 1210 02525  3025          DCA     SIZE            /STORE AS SIZE
+ 1211 02526  7344          CLA CMA CLL RAL         /A = 7776
+ 1212 02527  2025  SETS1,  ISZ     SIZE
+ 1213 02530  5332          JMP     SETS2
+ 1214 02531  5334          JMP     SETS3
+ 1215 02532  7004  SETS2,  RAL
+ 1216 02533  5327          JMP     SETS1
+ 1217 02534  3031  SETS3,  DCA     ATIO            /!MASK
+ 1218 02535  1001          TAD     REGS            /A = REGS
+ 1219 02536  7040          CMA                     /A = !REGS
+ 1220 02537  0031          AND     ATIO            /A = !REGS & !MASK
+ 1221 02540  7040          CMA                     /A = REGS + MASK
+ 1222 02541  3001          DCA     REGS
+ 1223 02542  5722          JMP I   SETS
+ 1224                      
+ 1225 02543  0000  CLRSB,  0000
+ 1226 02544  4776@         JMS     TPFOUR
+ 1227 02545  7040          CMA                     /NEGATE IT
+ 1228 02546  3025          DCA     SIZE            /STORE AS SIZE
+ 1229 02547  7344          CLA CMA CLL RAL         /A = 7776
+ 1230 02550  2025  CLRSB1, ISZ     SIZE
+
+
+
+      /HP-35 EMULATOR                                                    Page 27
+
+
+ 1231 02551  5353          JMP     CLRSB2
+ 1232 02552  5355          JMP     CLRSB3
+ 1233 02553  7004  CLRSB2, RAL
+ 1234 02554  5350          JMP     CLRSB1
+ 1235 02555  3031  CLRSB3, DCA     ATIO            /MASK
+ 1236 02556  1031          TAD     ATIO            /A = MASK
+ 1237 02557  0001          AND     REGS            /A = MASK & REGS
+ 1238 02560  3001          DCA     REGS
+ 1239 02561  5743          JMP I   CLRSB
+ 1240                      
+      02573  2674
+      02574  2652
+      02575  7762
+      02576  2600
+      02577  0012
+ 1241                      PAGE
+ 1242              
+ 1243 02600  0000  TPFOUR, 0000
+ 1244 02601  7300          CLA CLL
+ 1245 02602  1005          TAD     OPCODE
+ 1246 02603  7012          RTR
+ 1247 02604  7012          RTR
+ 1248 02605  7012          RTR
+ 1249 02606  0135          AND     [0017]          /GET TOP 4 BITS
+ 1250 02607  5600          JMP I   TPFOUR
+ 1251                      
+ 1252 02610  0000  TESTS,  0000
+ 1253 02611  4200          JMS     TPFOUR
+ 1254 02612  7040          CMA                     /NEGATE IT
+ 1255 02613  3025          DCA     SIZE            /STORE AS SIZE
+ 1256 02614  7324          CLA CLL CML RAL         /A = 0001
+ 1257 02615  2025  TESTS1, ISZ     SIZE
+ 1258 02616  5220          JMP     TESTS2
+ 1259 02617  5222          JMP     TESTS3
+ 1260 02620  7004  TESTS2, RAL
+ 1261 02621  5215          JMP     TESTS1
+ 1262 02622  0001  TESTS3, AND     REGS
+ 1263 02623  3014          DCA     CARRY
+ 1264 02624  5610          JMP I   TESTS
+ 1265                      
+ 1266 02625  0000  TESTP,  0000
+ 1267 02626  4200          JMS     TPFOUR
+ 1268 02627  7041          CMA IAC                 /A = -TOP FOUR
+ 1269 02630  1002          TAD     P               /A = -TOP FOUR + P
+ 1270 02631  7440          SZA                     /A == P?
+ 1271 02632  5625          JMP I   TESTP           /NO, CARRY STAYS 0
+ 1272 02633  7040          CMA                     /TOP FOUR == P, SET CARRY
+ 1273 02634  3014          DCA     CARRY
+ 1274 02635  5625          JMP I   TESTP
+ 1275                      
+
+
+
+      /HP-35 EMULATOR                                                    Page 28
+
+
+ 1276 02636  0000  GETAT,  0000
+ 1277 02637  7300          CLA CLL
+ 1278 02640  1027          TAD     REGIDX          /LOAD INDEX VALUE
+ 1279 02641  7010          RAR                     /SHIFT LOW BIT INTO L
+ 1280 02642  1026          TAD     REGTOP          /ADD TOP OF REGISTER
+ 1281 02643  3030          DCA     NEWIDX          /STORE NEW INDEX
+ 1282 02644  1430          TAD I   NEWIDX          /FETCH WORD AT INDEX
+ 1283 02645  7430          SZL                     /IF L = 1, SWAP BYTES
+ 1284 02646  7002          BSW
+ 1285 02647  0135          AND     [0017]          /GET ONLY 4 BITS
+ 1286 02650  3031          DCA     ATIO            /SAVE 4 BITS
+ 1287 02651  5636          JMP I   GETAT
+ 1288                      
+ 1289 02652  0000  STORAT, 0000
+ 1290 02653  7300          CLA CLL
+ 1291 02654  1031          TAD     ATIO            /GET INPUT
+ 1292 02655  0135          AND     [0017]          /ENSURE IT'S 4 BITS
+ 1293 02656  3031          DCA     ATIO            /SAVE INPUT
+ 1294 02657  1027          TAD     REGIDX          /LOAD INDEX VALUE
+ 1295 02660  7010          RAR                     /SHIFT LOW BIT INTO L
+ 1296 02661  1026          TAD     REGTOP          /ADD TOP OF REGISTER
+ 1297 02662  3030          DCA     NEWIDX          /STORE NEW INDEX
+ 1298 02663  1430          TAD I   NEWIDX          /FETCH WORD AT INDEX
+ 1299 02664  7430          SZL                     /IF L = 1, SWAP BYTES
+ 1300 02665  7002          BSW
+ 1301 02666  0377          AND     (1700)          /CLEAR 4 BITS
+ 1302 02667  1031          TAD     ATIO            /PUT 4 BITS IN WORD
+ 1303 02670  7430          SZL                     /IF L = 1, SWAP BYTES
+ 1304 02671  7002          BSW
+ 1305 02672  3430          DCA I   NEWIDX          /PUT WORD BACK
+ 1306 02673  5652          JMP I   STORAT
+ 1307                      
+ 1308 02674  0000  DECP,   0000                    /DECREMENT POINTER
+ 1309 02675  7200          CLA
+ 1310 02676  1002          TAD     P               /GET P
+ 1311 02677  7041          CMA IAC
+ 1312 02700  7040          CMA                     /SUBTRACT 1
+ 1313 02701  0135          AND     [0017]          /P &= 0X0F
+ 1314 02702  3002          DCA     P               /STORE P
+ 1315 02703  5674          JMP I   DECP
+ 1316                      
+ 1317 02704  0000  DISPT,  0000                    /TOGGLE DISPLAY
+ 1318 02705  7200          CLA
+ 1319 02706  3012          DCA     DISPEN          /DISABLE DISPLAY
+ 1320 02707  3013          DCA     UPDATE          /DON'T UPDATE DISPLAY
+ 1321 02710  5704          JMP I   DISPT
+ 1322                      
+ 1323 02711  0000  RETS,   0000                    /RETURN FROM SUB
+ 1324 02712  7200          CLA
+ 1325 02713  1004          TAD     RET
+
+
+
+      /HP-35 EMULATOR                                                    Page 29
+
+
+ 1326 02714  3020          DCA     PC              /PC = RET
+ 1327 02715  5711          JMP I   RETS
+ 1328                      
+ 1329 02716  0000  CLRS,   0000                    /CLEAR STATUS REG
+ 1330 02717  7200          CLA
+ 1331 02720  3001          DCA     REGS            /CLEAR STATUS
+ 1332 02721  5716          JMP I   CLRS            /CONTINUE
+ 1333              
+ 1334 02722  0000  INCP,   0000                    /INCREMENT POINTER
+ 1335 02723  7200          CLA
+ 1336 02724  1002          TAD     P               /GET P
+ 1337 02725  7001          IAC                     /ADD 1
+ 1338 02726  0135          AND     [0017]          /P &= 0X0F
+ 1339 02727  3002          DCA     P               /STORE P
+ 1340 02730  5722          JMP I   INCP    
+ 1341              
+ 1342 02731  0000  KTOROM, 0000                    /KEY TO ROM ADDR
+ 1343 02732  7200          CLA
+ 1344 02733  1024          TAD     KEYR
+ 1345 02734  3020          DCA     PC              /PC = KEY
+ 1346 02735  5731          JMP I   KTOROM
+ 1347                      
+ 1348 02736  0000  CEXCHM, 0000                    /EXCHANGE C AND M
+ 1349 02737  7200          CLA
+ 1350 02740  1376          TAD     (REGC-1)
+ 1351 02741  3010          DCA     INDEX1
+ 1352 02742  1375          TAD     (TEMP-1)
+ 1353 02743  3011          DCA     INDEX2
+ 1354 02744  4360          JMS     COPY            /COPY FROM C TO TEMP
+ 1355 02745  1374          TAD     (REGM-1)
+ 1356 02746  3010          DCA     INDEX1
+ 1357 02747  1376          TAD     (REGC-1)
+ 1358 02750  3011          DCA     INDEX2
+ 1359 02751  4360          JMS     COPY            /COPY FROM M TO C
+ 1360 02752  1375          TAD     (TEMP-1)
+ 1361 02753  3010          DCA     INDEX1
+ 1362 02754  1374          TAD     (REGM-1)
+ 1363 02755  3011          DCA     INDEX2
+ 1364 02756  4360          JMS     COPY            /COPY FROM TEMP TO M
+ 1365 02757  5736          JMP I   CEXCHM
+ 1366                      
+ 1367 02760  0000  COPY,   0000                    /COPY FROM INDEX1 TO INDEX2
+ 1368 02761  7200          CLA
+ 1369 02762  1373          TAD     (-0007)
+ 1370 02763  3025          DCA     SIZE
+ 1371 02764  1410  COPY1,  TAD I   INDEX1
+ 1372 02765  3411          DCA I   INDEX2
+ 1373 02766  2025          ISZ     SIZE
+ 1374 02767  5364          JMP     COPY1
+ 1375 02770  5760          JMP I   COPY
+
+
+
+      /HP-35 EMULATOR                                                    Page 30
+
+
+ 1376                      
+      02773  7771
+      02774  0104
+      02775  0113
+      02776  0050
+      02777  1700
+ 1377                      PAGE
+ 1378                      
+ 1379 03000  0000  PUSHC,  0000                    /PUSH C
+ 1380 03001  7200          CLA
+ 1381 03002  1377          TAD     (REGE-1)
+ 1382 03003  3010          DCA     INDEX1
+ 1383 03004  1376          TAD     (REGF-1)
+ 1384 03005  3011          DCA     INDEX2
+ 1385 03006  4775@         JMS     COPY            /COPY FROM E TO F
+ 1386 03007  1374          TAD     (REGD-1)
+ 1387 03010  3010          DCA     INDEX1
+ 1388 03011  1377          TAD     (REGE-1)
+ 1389 03012  3011          DCA     INDEX2
+ 1390 03013  4775@         JMS     COPY            /COPY FROM D TO E
+ 1391 03014  1373          TAD     (REGC-1)
+ 1392 03015  3010          DCA     INDEX1
+ 1393 03016  1374          TAD     (REGD-1)
+ 1394 03017  3011          DCA     INDEX2
+ 1395 03020  4775@         JMS     COPY            /COPY FROM C TO D
+ 1396 03021  5600          JMP I   PUSHC
+ 1397                      
+ 1398 03022  0000  PULLA,  0000                    /PULL A
+ 1399 03023  7200          CLA
+ 1400 03024  1374          TAD     (REGD-1)
+ 1401 03025  3010          DCA     INDEX1
+ 1402 03026  1372          TAD     (REGA-1)
+ 1403 03027  3011          DCA     INDEX2
+ 1404 03030  4775@         JMS     COPY            /COPY FROM D TO A
+ 1405 03031  1377          TAD     (REGE-1)
+ 1406 03032  3010          DCA     INDEX1
+ 1407 03033  1374          TAD     (REGD-1)
+ 1408 03034  3011          DCA     INDEX2
+ 1409 03035  4775@         JMS     COPY            /COPY FROM E TO D
+ 1410 03036  1376          TAD     (REGF-1)
+ 1411 03037  3010          DCA     INDEX1
+ 1412 03040  1377          TAD     (REGE-1)
+ 1413 03041  3011          DCA     INDEX2
+ 1414 03042  4775@         JMS     COPY            /COPY FROM F TO E
+ 1415 03043  5622          JMP I   PULLA
+ 1416                      
+ 1417 03044  0000  DISOFF, 0000                    /DISPLAY OFF
+ 1418 03045  7200          CLA
+ 1419 03046  1012          TAD     DISPEN          /GET DISPLAY ENABLE
+ 1420 03047  7040          CMA                     /INVERT IT
+
+
+
+      /HP-35 EMULATOR                                                    Page 31
+
+
+ 1421 03050  7440          SZA                     /IS DISPLAY ENABLED?
+ 1422 03051  2013          ISZ     UPDATE          /YES, UPDATE DISPLAY
+ 1423 03052  3012          DCA     DISPEN          /SAVE DISPLAY ENABLE
+ 1424 03053  5644          JMP I   DISOFF
+ 1425                      
+ 1426 03054  0000  MTOC,   0000                    /COPY M TO C
+ 1427 03055  7200          CLA
+ 1428 03056  1371          TAD     (REGM-1)
+ 1429 03057  3010          DCA     INDEX1
+ 1430 03060  1373          TAD     (REGC-1)
+ 1431 03061  3011          DCA     INDEX2
+ 1432 03062  4775@         JMS     COPY            /COPY FROM M TO C
+ 1433 03063  5654          JMP I   MTOC
+ 1434                      
+ 1435 03064  0000  ROTATE, 0000                    /ROTATE DOWN
+ 1436 03065  7200          CLA
+ 1437 03066  1373          TAD     (REGC-1)
+ 1438 03067  3010          DCA     INDEX1
+ 1439 03070  1370          TAD     (TEMP-1)
+ 1440 03071  3011          DCA     INDEX2
+ 1441 03072  4775@         JMS     COPY            /COPY FROM C TO TEMP
+ 1442 03073  1374          TAD     (REGD-1)
+ 1443 03074  3010          DCA     INDEX1
+ 1444 03075  1373          TAD     (REGC-1)
+ 1445 03076  3011          DCA     INDEX2
+ 1446 03077  4775@         JMS     COPY            /COPY FROM D TO C
+ 1447 03100  1377          TAD     (REGE-1)
+ 1448 03101  3010          DCA     INDEX1
+ 1449 03102  1374          TAD     (REGD-1)
+ 1450 03103  3011          DCA     INDEX2
+ 1451 03104  4775@         JMS     COPY            /COPY FROM E TO D
+ 1452 03105  1376          TAD     (REGF-1)
+ 1453 03106  3010          DCA     INDEX1
+ 1454 03107  1377          TAD     (REGE-1)
+ 1455 03110  3011          DCA     INDEX2
+ 1456 03111  4775@         JMS     COPY            /COPY FROM F TO E
+ 1457 03112  1370          TAD     (TEMP-1)
+ 1458 03113  3010          DCA     INDEX1
+ 1459 03114  1376          TAD     (REGF-1)
+ 1460 03115  3011          DCA     INDEX2
+ 1461 03116  4775@         JMS     COPY            /COPY FROM TEMP TO F
+ 1462 03117  5664          JMP I   ROTATE
+ 1463                      
+ 1464 03120  0000  CLEARR, 0000
+ 1465 03121  7200          CLA
+ 1466 03122  1367          TAD     (-0070)
+ 1467 03123  3025          DCA     SIZE
+ 1468 03124  1372          TAD     (REGA-1)
+ 1469 03125  3010          DCA     INDEX1
+ 1470 03126  3410  CLR1,   DCA I   INDEX1
+
+
+
+      /HP-35 EMULATOR                                                    Page 32
+
+
+ 1471 03127  2025          ISZ     SIZE
+ 1472 03130  5326          JMP     CLR1
+ 1473 03131  5720          JMP I   CLEARR
+ 1474                      
+ 1475 03132  0000  PRINTR, 0000
+ 1476 03133  7200          CLA
+ 1477 03134  1366          TAD     (-0016)         /REGISTER SIZE
+ 1478 03135  3025          DCA     SIZE
+ 1479 03136  7201  PRNR1,  CLA IAC                 /REGIDX = -SIZE - 1
+ 1480 03137  1025          TAD     SIZE
+ 1481 03140  7041          CMA IAC                 /TWO'S COMPLEMENT
+ 1482 03141  3027          DCA     REGIDX
+ 1483 03142  4765@         JMS     GETAT
+ 1484 03143  1031          TAD     ATIO
+ 1485 03144  1364          TAD     (0060)
+ 1486 03145  4763@         JMS     PRINT
+ 1487 03146  2025          ISZ     SIZE
+ 1488 03147  5336          JMP     PRNR1
+ 1489 03150  1362          TAD     (0012)          /NL
+ 1490 03151  4763@         JMS     PRINT
+ 1491 03152  1361          TAD     (0015)          /CR
+ 1492 03153  4763@         JMS     PRINT
+ 1493 03154  5732          JMP I   PRINTR
+ 1494                      
+      03161  0015
+      03162  0012
+      03163  0653
+      03164  0060
+      03165  2636
+      03166  7762
+      03167  7710
+      03170  0113
+      03171  0104
+      03172  0032
+      03173  0050
+      03174  0057
+      03175  2760
+      03176  0075
+      03177  0066
+ 1495        3600          *3600
+ 1496 03600  7777  NUMLU,  7777
+ 1497 03601  7777          7777
+ 1498 03602  0036          0036                    /*
+ 1499 03603  0026          0026                    /+
+ 1500 03604  7777          7777
+ 1501 03605  0066          0066                    /-
+ 1502 03606  0043          0043                    /.
+ 1503 03607  0046          0046                    //
+ 1504 03610  0044          0044                    /0
+ 1505 03611  0034          0034                    /1
+
+
+
+      /HP-35 EMULATOR                                                    Page 33
+
+
+ 1506 03612  0033          0033                    /2
+ 1507 03613  0032          0032                    /3
+ 1508 03614  0024          0024                    /4
+ 1509 03615  0023          0023                    /5
+ 1510 03616  0022          0022                    /6
+ 1511 03617  0064          0064                    /7
+ 1512 03620  0063          0063                    /8
+ 1513 03621  0062          0062                    /9
+ 1514 03622  7777          7777
+ 1515 03623  7777          7777
+ 1516 03624  7777          7777
+ 1517 03625  7777          7777
+ 1518 03626  7777          7777
+ 1519 03627  7777          7777
+ 1520 03630  7763  KEYLU,  -0015                   /ENTER
+ 1521 03631  0076          0076
+ 1522 03632  7745          -0033                   /ESC CLR
+ 1523 03633  0000          0000
+ 1524 03634  7642  KEYLU1, -0136                   /^ X^Y
+ 1525 03635  0006          0006
+ 1526 03636  7671          -0107                   /G LOG
+ 1527 03637  0004          0004
+ 1528 03640  7662          -0116                   /N LN
+ 1529 03641  0003          0003
+ 1530 03642  7650          -0130                   /X E^X
+ 1531 03643  0002          0002
+ 1532 03644  7657          -0121                   /Q SQRT(X)
+ 1533 03645  0056          0056
+ 1534 03646  7677          -0101                   /A ARC
+ 1535 03647  0054          0054
+ 1536 03650  7667          -0111                   /I SIN
+ 1537 03651  0053          0053
+ 1538 03652  7675          -0103                   /C COS
+ 1539 03653  0052          0052
+ 1540 03654  7654          -0124                   /T TAN
+ 1541 03655  0050          0050
+ 1542 03656  7660          -0120                   /P PI
+ 1543 03657  0042          0042
+ 1544 03660  7652          -0126                   /V 1/X
+ 1545 03661  0016          0016
+ 1546 03662  7651          -0127                   /W X<>Y
+ 1547 03663  0014          0014
+ 1548 03664  7664          -0114                   /L ROLL
+ 1549 03665  0013          0013
+ 1550 03666  7655          -0123                   /S STO
+ 1551 03667  0012          0012
+ 1552 03670  7656          -0122                   /R RCL
+ 1553 03671  0010          0010
+ 1554 03672  7670          -0110                   /H CHS
+ 1555 03673  0073          0073
+
+
+
+      /HP-35 EMULATOR                                                    Page 34
+
+
+ 1556 03674  7673          -0105                   /E EEX
+ 1557 03675  0072          0072
+ 1558 03676  7601          -0177                   /BACKSPACE CLX
+ 1559 03677  0070          0070
+ 1560                      
+ 1561                      
+ 1562        4000          *4000
+ 1563 04000  0000  INSTLU, 0000                    /START OF INSTRUCTION LOOKUP
+ 1564                      
+ 1565        6000          *6000
+ 1566 06000  0335  ROM35,  0335; 1377; 1044; 0027; 0504; 1104; 0204; 0420; 1321; 
+      06001  1377
+      06002  1044
+      06003  0027
+      06004  0504
+      06005  1104
+      06006  0204
+      06007  0420
+      06010  1321
+ 1567 06011  1773          1773; 0137; 0303; 0650; 1547; 1356; 1742; 0056; 0220; 
+      06012  0137
+      06013  0303
+      06014  0650
+      06015  1547
+      06016  1356
+      06017  1742
+      06020  0056
+      06021  0220
+ 1568 06022  1752          1752; 1752; 1752; 0153; 1151; 0250; 1250; 0377; 1752; 
+      06023  1752
+      06024  1752
+      06025  0153
+      06026  1151
+      06027  0250
+      06030  1250
+      06031  0377
+      06032  1752
+ 1569 06033  1752          1752; 1752; 0060; 0314; 0252; 0650; 0103; 0723; 0314; 
+      06034  1752
+      06035  0060
+      06036  0314
+      06037  0252
+      06040  0650
+      06041  0103
+      06042  0723
+      06043  0314
+ 1570 06044  0060          0060; 0000; 0203; 0504; 0104; 0273; 1104; 0237; 1204; 
+      06045  0000
+      06046  0203
+      06047  0504
+
+
+
+      /HP-35 EMULATOR                                                    Page 35
+
+
+      06050  0104
+      06051  0273
+      06052  1104
+      06053  0237
+      06054  1204
+ 1571 06055  1413          1413; 0056; 0220; 1450; 1557; 1752; 1752; 1752; 0113; 
+      06056  0056
+      06057  0220
+      06060  1450
+      06061  1557
+      06062  1752
+      06063  1752
+      06064  1752
+      06065  0113
+ 1572 06066  1147          1147; 1650; 0561; 1567; 1713; 1316; 0304; 0733; 0450; 
+      06067  1650
+      06070  0561
+      06071  1567
+      06072  1713
+      06073  1316
+      06074  0304
+      06075  0733
+      06076  0450
+ 1573 06077  0064          0064; 1316; 1565; 0456; 1372; 0426; 1552; 1603; 0672; 
+      06100  1316
+      06101  1565
+      06102  0456
+      06103  1372
+      06104  0426
+      06105  1552
+      06106  1603
+      06107  0672
+ 1574 06110  1633          1633; 1466; 1514; 1633; 0034; 0752; 0002; 0463; 1304; 
+      06111  1466
+      06112  1514
+      06113  1633
+      06114  0034
+      06115  0752
+      06116  0002
+      06117  0463
+      06120  1304
+ 1575 06121  1326          1326; 1646; 0424; 1037; 0575; 1567; 0322; 0562; 0332; 
+      06122  1646
+      06123  0424
+      06124  1037
+      06125  0575
+      06126  1567
+      06127  0322
+      06130  0562
+      06131  0332
+
+
+
+      /HP-35 EMULATOR                                                    Page 36
+
+
+ 1576 06132  1612          1612; 0567; 0316; 0064; 0616; 1414; 0452; 0612; 0672; 
+      06133  0567
+      06134  0316
+      06135  0064
+      06136  0616
+      06137  1414
+      06140  0452
+      06141  0612
+      06142  0672
+ 1577 06143  0643          0643; 0252; 0572; 0537; 0514; 1652; 0424; 0413; 1452; 
+      06144  0252
+      06145  0572
+      06146  0537
+      06147  0514
+      06150  1652
+      06151  0424
+      06152  0413
+      06153  1452
+ 1578 06154  0052          0052; 1735; 0412; 1316; 1454; 1047; 1662; 0753; 1321; 
+      06155  1735
+      06156  0412
+      06157  1316
+      06160  1454
+      06161  1047
+      06162  1662
+      06163  0753
+      06164  1321
+ 1579 06165  0220          0220; 0424; 1733; 1662; 0372; 0616; 0672; 0777; 0332; 
+      06166  0424
+      06167  1733
+      06170  1662
+      06171  0372
+      06172  0616
+      06173  0672
+      06174  0777
+      06175  0332
+ 1580 06176  0252          0252; 1514; 0426; 0552; 1176; 0473; 1166; 1003; 0312; 
+      06177  1514
+      06200  0426
+      06201  0552
+      06202  1176
+      06203  0473
+      06204  1166
+      06205  1003
+      06206  0312
+ 1581 06207  1735          1735; 1326; 0636; 1454; 1117; 0216; 0756; 0114; 0422; 
+      06210  1326
+      06211  0636
+      06212  1454
+      06213  1117
+
+
+
+      /HP-35 EMULATOR                                                    Page 37
+
+
+      06214  0216
+      06215  0756
+      06216  0114
+      06217  0422
+ 1582 06220  0074          0074; 0642; 1077; 1656; 0354; 1747; 0312; 0604; 0753; 
+      06221  0642
+      06222  1077
+      06223  1656
+      06224  0354
+      06225  1747
+      06226  0312
+      06227  0604
+      06230  0753
+ 1583 06231  0376          0376; 0650; 0056; 1772; 1772; 0772; 0772; 0112; 1217; 
+      06232  0650
+      06233  0056
+      06234  1772
+      06235  1772
+      06236  0772
+      06237  0772
+      06240  0112
+      06241  1217
+ 1584 06242  1656          1656; 1646; 0646; 1237; 1656; 1046; 0112; 1373; 1216; 
+      06243  1646
+      06244  0646
+      06245  1237
+      06246  1656
+      06247  1046
+      06250  0112
+      06251  1373
+      06252  1216
+ 1585 06253  1752          1752; 0016; 1373; 1243; 1366; 0324; 1323; 1576; 0376; 
+      06254  0016
+      06255  1373
+      06256  1243
+      06257  1366
+      06260  0324
+      06261  1323
+      06262  1576
+      06263  0376
+ 1586 06264  0724          0724; 1337; 0450; 0704; 0316; 0556; 0276; 0776; 1056; 
+      06265  1337
+      06266  0450
+      06267  0704
+      06270  0316
+      06271  0556
+      06272  0276
+      06273  0776
+      06274  1056
+ 1587 06275  0060          0060; 0220; 0561; 0504; 1567; 1316; 0636; 1044; 1477; 
+
+
+
+      /HP-35 EMULATOR                                                    Page 38
+
+
+      06276  0220
+      06277  0561
+      06300  0504
+      06301  1567
+      06302  1316
+      06303  0636
+      06304  1044
+      06305  1477
+ 1588 06306  0772          0772; 1004; 0524; 1467; 0752; 1433; 0050; 0024; 1437; 
+      06307  1004
+      06310  0524
+      06311  1467
+      06312  0752
+      06313  1433
+      06314  0050
+      06315  0024
+      06316  1437
+ 1589 06317  0044          0044; 0034; 1454; 1503; 1050; 1024; 1463; 0416; 0544; 
+      06320  0034
+      06321  1454
+      06322  1503
+      06323  1050
+      06324  1024
+      06325  1463
+      06326  0416
+      06327  0544
+ 1590 06330  0320          0320; 0450; 1656; 0565; 0704; 1735; 1275; 1053; 1326; 
+      06331  0450
+      06332  1656
+      06333  0565
+      06334  0704
+      06335  1735
+      06336  1275
+      06337  1053
+      06340  1326
+ 1591 06341  0034          0034; 0254; 0427; 1414; 1356; 1366; 1742; 1742; 0214; 
+      06342  0254
+      06343  0427
+      06344  1414
+      06345  1356
+      06346  1366
+      06347  1742
+      06350  1742
+      06351  0214
+ 1592 06352  0074          0074; 1542; 1677; 0002; 1653; 1742; 1456; 0060; 0404; 
+      06353  1542
+      06354  1677
+      06355  0002
+      06356  1653
+      06357  1742
+
+
+
+      /HP-35 EMULATOR                                                    Page 39
+
+
+      06360  1456
+      06361  0060
+      06362  0404
+ 1593 06363  1324          1324; 0163; 0677; 0376; 1244; 1417; 0624; 1763; 0034; 
+      06364  0163
+      06365  0677
+      06366  0376
+      06367  1244
+      06370  1417
+      06371  0624
+      06372  1763
+      06373  0034
+ 1594 06374  1222          1222; 0751; 1250; 1557; 1717; 1456; 0241; 0650; 0241; 
+      06375  0751
+      06376  1250
+      06377  1557
+      06400  1717
+      06401  1456
+      06402  0241
+      06403  0650
+      06404  0241
+ 1595 06405  0650          0650; 1124; 0047; 1656; 0524; 0113; 0336; 1231; 0450; 
+      06406  1124
+      06407  0047
+      06410  1656
+      06411  0524
+      06412  0113
+      06413  0336
+      06414  1231
+      06415  0450
+ 1596 06416  1225          1225; 1141; 0225; 0650; 1231; 1224; 1553; 1356; 1742; 
+      06417  1141
+      06420  0225
+      06421  0650
+      06422  1231
+      06423  1224
+      06424  1553
+      06425  1356
+      06426  1742
+ 1597 06427  0446          0446; 1646; 0552; 1222; 0672; 0147; 1322; 0752; 0167; 
+      06430  1646
+      06431  0552
+      06432  1222
+      06433  0672
+      06434  0147
+      06435  1322
+      06436  0752
+      06437  0167
+ 1598 06440  1316          1316; 1216; 0450; 1056; 0407; 1056; 0414; 1573; 0450; 
+      06441  1216
+
+
+
+      /HP-35 EMULATOR                                                    Page 40
+
+
+      06442  0450
+      06443  1056
+      06444  0407
+      06445  1056
+      06446  0414
+      06447  1573
+      06450  0450
+ 1599 06451  1656          1656; 0642; 0267; 0256; 0616; 0212; 1457; 0616; 0124; 
+      06452  0642
+      06453  0267
+      06454  0256
+      06455  0616
+      06456  0212
+      06457  1457
+      06460  0616
+      06461  0124
+ 1600 06462  0227          0227; 1224; 0667; 0524; 0127; 0376; 1676; 0067; 1222; 
+      06463  1224
+      06464  0667
+      06465  0524
+      06466  0127
+      06467  0376
+      06470  1676
+      06471  0067
+      06472  1222
+ 1601 06473  1576          1576; 0353; 0776; 1462; 0722; 1456; 0456; 1522; 0357; 
+      06474  0353
+      06475  0776
+      06476  1462
+      06477  0722
+      06500  1456
+      06501  0456
+      06502  1522
+      06503  0357
+ 1602 06504  0650          0650; 1316; 1662; 1456; 0422; 0450; 1776; 1776; 0217; 
+      06505  1316
+      06506  1662
+      06507  1456
+      06510  0422
+      06511  0450
+      06512  1776
+      06513  1776
+      06514  0217
+ 1603 06515  0316          0316; 0052; 1326; 1311; 0542; 0650; 1656; 0414; 1221; 
+      06516  0052
+      06517  1326
+      06520  1311
+      06521  0542
+      06522  0650
+      06523  1656
+
+
+
+      /HP-35 EMULATOR                                                    Page 41
+
+
+      06524  0414
+      06525  1221
+ 1604 06526  0614          0614; 1155; 1014; 1155; 0214; 1030; 1214; 1155; 1071; 
+      06527  1155
+      06530  1014
+      06531  1155
+      06532  0214
+      06533  1030
+      06534  1214
+      06535  1155
+      06536  1071
+ 1605 06537  1155          1155; 1461; 0416; 1155; 0216; 1455; 1461; 1256; 1231; 
+      06540  1461
+      06541  0416
+      06542  1155
+      06543  0216
+      06544  1455
+      06545  1461
+      06546  1256
+      06547  1231
+ 1606 06550  1124          1124; 0663; 0376; 1141; 0144; 0316; 0542; 0752; 0124; 
+      06551  0663
+      06552  0376
+      06553  1141
+      06554  0144
+      06555  0316
+      06556  0542
+      06557  0752
+      06560  0124
+ 1607 06561  1227          1227; 1231; 1461; 1256; 1225; 1461; 1256; 1256; 1125; 
+      06562  1231
+      06563  1461
+      06564  1256
+      06565  1225
+      06566  1461
+      06567  1256
+      06570  1256
+      06571  1125
+ 1608 06572  1256          1256; 1655; 1461; 1214; 1161; 1071; 1014; 1165; 0214; 
+      06573  1655
+      06574  1461
+      06575  1214
+      06576  1161
+      06577  1071
+      06600  1014
+      06601  1165
+      06602  0214
+ 1609 06603  1030          1030; 0614; 1161; 0414; 1161; 1161; 1456; 1116; 1514; 
+      06604  0614
+      06605  1161
+
+
+
+      /HP-35 EMULATOR                                                    Page 42
+
+
+      06606  0414
+      06607  1161
+      06610  1161
+      06611  1456
+      06612  1116
+      06613  1514
+ 1610 06614  0530          0530; 1757; 0614; 1030; 0630; 0530; 0230; 0430; 1130; 
+      06615  1757
+      06616  0614
+      06617  1030
+      06620  0630
+      06621  0530
+      06622  0230
+      06623  0430
+      06624  1130
+ 1611 06625  0124          0124; 1553; 0060; 1356; 1742; 0020; 0420; 0416; 1226; 
+      06626  1553
+      06627  0060
+      06630  1356
+      06631  1742
+      06632  0020
+      06633  0420
+      06634  0416
+      06635  1226
+ 1612 06636  1056          1056; 1207; 0776; 1416; 1203; 1616; 0420; 0420; 0512; 
+      06637  1207
+      06640  0776
+      06641  1416
+      06642  1203
+      06643  1616
+      06644  0420
+      06645  0420
+      06646  0512
+ 1613 06647  0420          0420; 0742; 1516; 1243; 1716; 0416; 0034; 1122; 0054; 
+      06650  0742
+      06651  1516
+      06652  1243
+      06653  1716
+      06654  0416
+      06655  0034
+      06656  1122
+      06657  0054
+ 1614 06660  1247          1247; 0267; 0742; 1426; 1313; 1626; 0426; 0034; 0054; 
+      06661  0267
+      06662  0742
+      06663  1426
+      06664  1313
+      06665  1626
+      06666  0426
+      06667  0034
+
+
+
+      /HP-35 EMULATOR                                                    Page 43
+
+
+      06670  0054
+ 1615 06671  1317          1317; 0267; 0034; 1626; 1557; 0020; 0572; 0572; 1352; 
+      06672  0267
+      06673  0034
+      06674  1626
+      06675  1557
+      06676  0020
+      06677  0572
+      06700  0572
+      06701  1352
+ 1616 06702  1536          1536; 1176; 1433; 0420; 1006; 1453; 0376; 1456; 1416; 
+      06703  1176
+      06704  1433
+      06705  0420
+      06706  1006
+      06707  1453
+      06710  0376
+      06711  1456
+      06712  1416
+ 1617 06713  0420          0420; 0316; 1314; 0730; 1030; 0530; 0330; 1130; 1030; 
+      06714  0316
+      06715  1314
+      06716  0730
+      06717  1030
+      06720  0530
+      06721  0330
+      06722  1130
+      06723  1030
+ 1618 06724  0130          0130; 0630; 0330; 0530; 1414; 0060; 0020; 1612; 1573; 
+      06725  0630
+      06726  0330
+      06727  0530
+      06730  1414
+      06731  0060
+      06732  0020
+      06733  1612
+      06734  1573
+ 1619 06735  0542          0542; 0776; 0054; 1357; 1652; 1352; 0142; 1633; 1316; 
+      06736  0776
+      06737  0054
+      06740  1357
+      06741  1652
+      06742  1352
+      06743  0142
+      06744  1633
+      06745  1316
+ 1620 06746  1116          1116; 1052; 0312; 1414; 1273; 0420; 1222; 1222; 0576; 
+      06747  1052
+      06750  0312
+      06751  1414
+
+
+
+      /HP-35 EMULATOR                                                    Page 44
+
+
+      06752  1273
+      06753  0420
+      06754  1222
+      06755  1222
+      06756  0576
+ 1621 06757  1663          1663; 0722; 1422; 1062; 0216; 1576; 1673; 1662; 0650; 
+      06760  0722
+      06761  1422
+      06762  1062
+      06763  0216
+      06764  1576
+      06765  1673
+      06766  1662
+      06767  0650
+ 1622 06770  0036          0036; 0007; 0416; 1662; 0450; 1222; 0576; 1076; 0020; 
+      06771  0007
+      06772  0416
+      06773  1662
+      06774  0450
+      06775  1222
+      06776  0576
+      06777  1076
+      07000  0020
+ 1623 07001  1476          1476; 1776; 1126; 0422; 0113; 0650; 1231; 0616; 1024; 
+      07002  1776
+      07003  1126
+      07004  0422
+      07005  0113
+      07006  0650
+      07007  1231
+      07010  0616
+      07011  1024
+ 1624 07012  0413          0413; 1356; 1506; 0003; 1316; 0576; 0003; 0776; 0456; 
+      07013  1356
+      07014  1506
+      07015  0003
+      07016  1316
+      07017  0576
+      07020  0003
+      07021  0776
+      07022  0456
+ 1625 07023  1131          1131; 1542; 0107; 1462; 1636; 0007; 0714; 0665; 1014; 
+      07024  1542
+      07025  0107
+      07026  1462
+      07027  1636
+      07030  0007
+      07031  0714
+      07032  0665
+      07033  1014
+
+
+
+      /HP-35 EMULATOR                                                    Page 45
+
+
+ 1626 07034  1165          1165; 1114; 1161; 1771; 1214; 1161; 0765; 1314; 1161; 
+      07035  1114
+      07036  1161
+      07037  1771
+      07040  1214
+      07041  1161
+      07042  0765
+      07043  1314
+      07044  1161
+ 1627 07045  1575          1575; 1161; 1345; 1161; 1731; 1656; 0516; 0032; 0277; 
+      07046  1161
+      07047  1345
+      07050  1161
+      07051  1731
+      07052  1656
+      07053  0516
+      07054  0032
+      07055  0277
+ 1628 07056  0516          0516; 1456; 0034; 0416; 0154; 0303; 1656; 0676; 0343; 
+      07057  1456
+      07060  0034
+      07061  0416
+      07062  0154
+      07063  0303
+      07064  1656
+      07065  0676
+      07066  0343
+ 1629 07067  0346          0346; 0752; 1314; 1425; 1124; 0033; 0524; 1123; 1731; 
+      07070  0752
+      07071  1314
+      07072  1425
+      07073  1124
+      07074  0033
+      07075  0524
+      07076  1123
+      07077  1731
+ 1630 07100  1235          1235; 1123; 1731; 1661; 1345; 1314; 1155; 1575; 1214; 
+      07101  1123
+      07102  1731
+      07103  1661
+      07104  1345
+      07105  1314
+      07106  1155
+      07107  1575
+      07110  1214
+ 1631 07111  1155          1155; 0765; 1114; 1155; 1771; 1014; 1155; 1155; 1155; 
+      07112  0765
+      07113  1114
+      07114  1155
+      07115  1771
+
+
+
+      /HP-35 EMULATOR                                                    Page 46
+
+
+      07116  1014
+      07117  1155
+      07120  1155
+      07121  1155
+ 1632 07122  0614          0614; 1362; 1514; 1056; 1656; 0630; 1073; 0224; 0573; 
+      07123  1362
+      07124  1514
+      07125  1056
+      07126  1656
+      07127  0630
+      07130  1073
+      07131  0224
+      07132  0573
+ 1633 07133  1752          1752; 1172; 1413; 1426; 0547; 1626; 0416; 0552; 0563; 
+      07134  1172
+      07135  1413
+      07136  1426
+      07137  0547
+      07140  1626
+      07141  0416
+      07142  0552
+      07143  0563
+ 1634 07144  1316          1316; 0322; 1652; 0676; 0663; 1456; 1416; 0356; 1316; 
+      07145  0322
+      07146  1652
+      07147  0676
+      07150  0663
+      07151  1456
+      07152  1416
+      07153  0356
+      07154  1316
+ 1635 07155  1056          1056; 0316; 0546; 0224; 0733; 0430; 0746; 0747; 0630; 
+      07156  0316
+      07157  0546
+      07160  0224
+      07161  0733
+      07162  0430
+      07163  0746
+      07164  0747
+      07165  0630
+ 1636 07166  0154          0154; 0727; 1116; 1116; 0224; 1123; 0060; 0714; 0330; 
+      07167  0727
+      07170  1116
+      07171  1116
+      07172  0224
+      07173  1123
+      07174  0060
+      07175  0714
+      07176  0330
+ 1637 07177  0330          0330; 0030; 1030; 0530; 0030; 1130; 1653; 1131; 1742; 
+
+
+
+      /HP-35 EMULATOR                                                    Page 47
+
+
+      07200  0030
+      07201  1030
+      07202  0530
+      07203  0030
+      07204  1130
+      07205  1653
+      07206  1131
+      07207  1742
+ 1638 07210  0456          0456; 0576; 1033; 1322; 1656; 0426; 1656; 1576; 1043; 
+      07211  0576
+      07212  1033
+      07213  1322
+      07214  1656
+      07215  0426
+      07216  1656
+      07217  1576
+      07220  1043
+ 1639 07221  1456          1456; 1742; 1461; 0220; 1322; 1576; 1127; 1376; 1616; 
+      07222  1742
+      07223  1461
+      07224  0220
+      07225  1322
+      07226  1576
+      07227  1127
+      07230  1376
+      07231  1616
+ 1640 07232  0060          0060; 0220; 1316; 1056; 1203; 1616; 0576; 1177; 1656; 
+      07233  0220
+      07234  1316
+      07235  1056
+      07236  1203
+      07237  1616
+      07240  0576
+      07241  1177
+      07242  1656
+ 1641 07243  0426          0426; 1656; 0667; 0314; 0712; 0536; 1257; 0276; 1446; 
+      07244  1656
+      07245  0667
+      07246  0314
+      07247  0712
+      07250  0536
+      07251  1257
+      07252  0276
+      07253  1446
+ 1642 07254  1356          1356; 1454; 1427; 0146; 1333; 0124; 0003; 0222; 1546; 
+      07255  1454
+      07256  1427
+      07257  0146
+      07260  1333
+      07261  0124
+
+
+
+      /HP-35 EMULATOR                                                    Page 48
+
+
+      07262  0003
+      07263  0222
+      07264  1546
+ 1643 07265  0772          0772; 1062; 1646; 0220; 1044; 0630; 1130; 0330; 0130; 
+      07266  1062
+      07267  1646
+      07270  0220
+      07271  1044
+      07272  0630
+      07273  1130
+      07274  0330
+      07275  0130
+ 1644 07276  0430          0430; 0730; 0130; 1633; 1746; 0623; 1616; 0542; 1423; 
+      07277  0730
+      07300  0130
+      07301  1633
+      07302  1746
+      07303  0623
+      07304  1616
+      07305  0542
+      07306  1423
+ 1645 07307  1316          1316; 0074; 1554; 1427; 0752; 1376; 1414; 0056; 1142; 
+      07310  0074
+      07311  1554
+      07312  1427
+      07313  0752
+      07314  1376
+      07315  1414
+      07316  0056
+      07317  1142
+ 1646 07320  1533          1533; 0416; 0552; 1156; 1477; 0316; 0452; 1616; 1176; 
+      07321  0416
+      07322  0552
+      07323  1156
+      07324  1477
+      07325  0316
+      07326  0452
+      07327  1616
+      07330  1176
+ 1647 07331  1437          1437; 1646; 0616; 0056; 1414; 0753; 1114; 0330; 0130; 
+      07332  1646
+      07333  0616
+      07334  0056
+      07335  1414
+      07336  0753
+      07337  1114
+      07340  0330
+      07341  0130
+ 1648 07342  0030          0030; 0130; 0730; 1130; 1030; 0030; 0530; 0530; 0330; 
+      07343  0130
+
+
+
+      /HP-35 EMULATOR                                                    Page 49
+
+
+      07344  0730
+      07345  1130
+      07346  1030
+      07347  0030
+      07350  0530
+      07351  0530
+      07352  0330
+ 1649 07353  1567          1567; 1656; 0456; 0606; 1272; 0573; 0772; 1316; 0752; 
+      07354  1656
+      07355  0456
+      07356  0606
+      07357  1272
+      07360  0573
+      07361  0772
+      07362  1316
+      07363  0752
+ 1650 07364  1713          1713; 0637; 0316; 1414; 0230; 0330; 0030; 0230; 0530; 
+      07365  0637
+      07366  0316
+      07367  1414
+      07370  0230
+      07371  0330
+      07372  0030
+      07373  0230
+      07374  0530
+ 1651 07375  1007          1007; 0514; 0773;
+      07376  0514
+      07377  0773
+ 1652                      
+      00134  0007
+      00135  0017
+      00136  0034
+      00137  0060
+      00140  0051
+      00141  0042
+      00142  0033
+      00143  0377
+      00144  3120
+      00145  3064
+      00146  3054
+      00147  3044
+      00150  3022
+      00151  3000
+      00152  2731
+      00153  2736
+      00154  2716
+      00155  2711
+      00156  2704
+      00157  1200
+      00160  2722
+
+
+
+      /HP-35 EMULATOR                                                    Page 50
+
+
+      00161  2625
+      00162  2543
+      00163  2674
+      00164  2504
+      00165  2610
+      00166  2467
+      00167  2522
+      00170  2473
+      00171  2454
+      00172  7760
+      00173  2437
+      00174  1205
+      00175  2424
+      00176  1202
+      00177  7400
+ 1653              $
+
+      No detected errors
+      132 links generated
+
+
+
+      /HP-35 EMULATOR                                                    Page 51
+                                                                    Symbol Table
+
+    1  ADDR   00022   CLEARR 03120   INDEX2 00011   REGE   00067 
+    2  AR00   01313   CLR1   03126   INIT1  00204   REGF   00076 
+    3  AR01   01323   CLRS   02716   INIT2  00222   REGIDX 00027 
+    4  AR02   01331   CLRSB  02543   INIT3  00240   REGM   00105 
+    5  AR03   01346   CLRSB1 02550   INIT4  00400   REGS   00001 
+    6  AR04   01400   CLRSB2 02553   INSDEC 00643   REGTOP 00026 
+    7  AR05   01410   CLRSB3 02555   INSTLU 04000   RESULT 00117 
+    8  AR06   01424   COPY   02760   INVKEY 00735   RET    00004 
+    9  AR07   01432   COPY1  02764   JSB    02424   RETS   02711 
+   10  AR08   01446   DEBUG  00032   KEYC   00023   ROM    00003 
+   11  AR09   01462   DEBUGP 00606   KEYLU  03630   ROM35  06000 
+   12  AR0A   01472   DECOD1 00714   KEYLU1 03634   ROTATE 03064 
+   13  AR0B   01512   DECODE 00000   KEYR   00024   SELROM 02454 
+   14  AR0C   01526   DECOLP 00721   KTOROM 02731   SETP   02467 
+   15  AR0D   01536   DECP   02674   LAST   00007   SETS   02522 
+   16  AR0E   01546   DELROM 00021   LDCONS 02504   SETS1  02527 
+   17  AR0F   01600   DISOFF 03044   LDCST1 02520   SETS2  02532 
+   18  AR10   01614   DISP   01000   LOOP   00514   SETS3  02534 
+   19  AR11   01631   DISPEN 00012   LOOP1  00555   SIZE   00025 
+   20  AR12   01653   DISPT  02704   LOOP2  00600   STORAT 02652 
+   21  AR121  01666   DOADD  02327   LOOP3  00623   TEMP   00114 
+   22  AR122  01664   DOADD1 02350   LPDIS1 01022   TESTP  02625 
+   23  AR13   01676   DOADD2 02346   LPDIS2 01052   TESTS  02610 
+   24  AR14   01710   DOSUB  02400   LPDIS3 01061   TESTS1 02615 
+   25  AR141  01723   DOSUB1 02406   LPDIS4 01076   TESTS2 02620 
+   26  AR142  01721   DOSUB2 02421   LPDIS5 01072   TESTS3 02622 
+   27  AR15   01733   DOSUB3 02422   LPDIS6 01074   TPFOUR 02600 
+   28  AR16   01750   DSROM  02473   LPDIS7 01105   UPDATE 00013 
+   29  AR161  01763   ERR    00016   LPDIS8 01120 
+   30  AR162  01761   ERRLP  01131   LPDIS9 01116 
+   31  AR17   02000   ERRMSG 01136   LPDISP 01011 
+   32  AR18   02007   ERROR  01202   MTOC   03054 
+   33  AR19   02027   FIRST  00006   NEWIDX 00030 
+   34  AR1A   02051   FL1    02320   NUMLU  03600 
+   35  AR1B   02071   FL2    02321   OPCODE 00005 
+   36  AR1C   02105   FL3    02322   OPNOP  01200 
+   37  AR1D   02200   FL5    02324   P      00002 
+   38  AR1E   02222   FL6    02325   PC     00020 
+   39  AR1F   02242   FL7    02326   PCARRY 00015 
+   40  ARITH  01205   GETAT  02636   PRCR   01027 
+   41  ARITH1 01230   GETFL  02256   PRINT  00653 
+   42  ARITH2 01233   GETFL1 02274   PRINTR 03132 
+   43  ARLOOK 01253   GETFL2 02304   PRNR1  03136 
+   44  ATIO   00031   GETSR  00544   PULLA  03022 
+   45  BIGLP  01033   GOTO   02437   PUSHC  03000 
+   46  BYTE1  00115   HLTINS 00123   READKB 00661 
+   47  BYTE2  00116   HLTNOW 00634   REGA   00033 
+   48  CARRY  00014   HLTOPC 00636   REGB   00042 
+   49  CEXCHM 02736   INCP   02722   REGC   00051 
+   50  CHKKEY 00740   INDEX1 00010   REGD   00060 
