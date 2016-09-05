@@ -37,6 +37,13 @@ Starting the program at `0200` will run the simulator; switching SR0 (the
 left-most switch) will toggle between HP-35 (0) and HP-45 (1) modes. Typing `?`
 will print the valid keys used to interact with the simulator.
 
+### TO-DO ###
+
+Some planned ideas are to implement OS/8 support (easy), handle the HP-45 error
+display (slightly challenging), and offer macro support for HP-35 only and HP-45
+only versions that run in a single field, though the HP-45 microcode may be too
+large for this.
+
 ### SPECIAL THANKS ###
 
 Thanks to Eric Smith for his inspiration in creating `casmsim` followed by
