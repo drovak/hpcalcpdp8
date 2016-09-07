@@ -47,15 +47,15 @@ If you're using SimH, you'll need to ensure you've attached the file to the
 reader using `at ptr [file]`. 
 
 The basic PIP usage in OS/8 is:
-	R PIP
-	DSK:HPCALC.PA<PTR:
+    R PIP
+    DSK:HPCALC.PA<PTR:
 
 PIP will print a `^`; press `return`, then `ctrl-c`, and then assemble it using
 PAL: `PAL DSK:HPCALC`. No errors should be generated.
 
 To run the program, you can `LOAD DSK:HPCALC.BN /G`. Or, if you are so inclined,
 you can save it as a `.SV` file by first running `LOAD DSK:HPCALC.BN`, then:
-	SAVE DSK HPCALC 00000-04777,10200-17377;00200=0000
+    SAVE DSK HPCALC 00000-04777,10200-17377;00200=0000
 
 This saves locations 0-4777 in the first field, 200-7377 in the second field,
 sets the starting address to 200, and sets the job status word to the
