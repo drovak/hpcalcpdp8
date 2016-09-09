@@ -19,8 +19,9 @@ or implied.
 This has been tested and works fine under `SimH`. Previous versions have run
 well on Omnibus hardware. With macros, a 4k HP-35 only version is available,
 but otherwise, it requires two fields (8k words) to run. This program relies on
-the over-typing of a single line of text; hence, a video terminal is
-recommended. However, a printing terminal option is underway.
+the over-typing of a single line of text with the video terminal flag set;
+hence, a video terminal is recommended. However, a rudimentary printing
+terminal option has been developed.
 
 `palbart` is used to assemble the file for use under `SimH`. `gcc` or `clang` is
 used to compile `obj2oct`, which is a simple utility used to convert a
@@ -33,7 +34,7 @@ be used assuming `palbart` is installed as `pal` in your path.
 Starting the program at `0200` will run the simulator; switching SR0 (the
 left-most switch) will toggle between HP-35 (0) and HP-45 (1) modes if
 assembled with the default options. Typing `?` will print the valid keys used
-to interact with the simulator.
+to interact with the simulator, again assuming the full version was assembled.
 
 ### OS/8 USAGE ###
 
@@ -72,7 +73,7 @@ program with `R HPCALC`. A ctrl-c should return you to the OS/8 prompt.
 
 Currently...
 * Handle HP-45 error display (slightly challenging)
-* Support for printing terminals (pretty easy, I think)
+* Better support for printing terminals (more challenging)
 
 ### SPECIAL THANKS ###
 
