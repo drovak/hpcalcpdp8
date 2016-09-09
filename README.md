@@ -1,5 +1,5 @@
 # HP-35 and HP-45 Simulator for PDP-8 #
-### Kyle Owen - 4 September 2016 ###
+### Kyle Owen - 9 September 2016 ###
 ### kylevowen@gmail.com ###
 
 This program is a simulator using the original HP-35 and HP-45 microcode. Thus,
@@ -17,13 +17,10 @@ or implied.
 ### REQUIREMENTS ###
 
 This has been tested and works fine under `SimH`. Previous versions have run
-well on Omnibus hardware. Slight modifications would be required to convert this
-program to run on older pre-Omnibus hardware. It requires two fields (8k words)
-to run, though running just the HP-35 portion of the simulator can be done in
-one field, likely without the help text as well. This program relies on the
-over-typing of a single line of text; hence, a video terminal is recommended.
-Modifications could be made to support a printing terminal, though this may be
-more challenging than initially anticipated. 
+well on Omnibus hardware. With macros, a 4k HP-35 only version is available,
+but otherwise, it requires two fields (8k words) to run. This program relies on
+the over-typing of a single line of text; hence, a video terminal is
+recommended. However, a printing terminal option is underway.
 
 `palbart` is used to assemble the file for use under `SimH`. `gcc` or `clang` is
 used to compile `obj2oct`, which is a simple utility used to convert a
@@ -34,14 +31,17 @@ be used assuming `palbart` is installed as `pal` in your path.
 ### BASIC USAGE ###
 
 Starting the program at `0200` will run the simulator; switching SR0 (the
-left-most switch) will toggle between HP-35 (0) and HP-45 (1) modes. Typing `?`
-will print the valid keys used to interact with the simulator.
+left-most switch) will toggle between HP-35 (0) and HP-45 (1) modes if
+assembled with the default options. Typing `?` will print the valid keys used
+to interact with the simulator.
 
 ### OS/8 USAGE ###
 
-Ensure the `OS8` flag is uncommented. Transfer the file to the OS/8 image of
-your choice using PIP, but first, ensure that the assembly file has DOS line
-endings. In VIM, you can do this with `:e ++ff=dos` followed by a `:w`. 
+Ensure the flags are set correctly; the default options are for the 8k
+full-featured OS/8 version, which should work fine. Transfer the file to the
+OS/8 image of your choice using PIP, but first, ensure that the assembly file
+has DOS line endings. In VIM, you can do this with `:e ++ff=dos` followed by a
+`:w`. 
 
 If you're using SimH, you'll need to ensure you've attached the file to the
 reader using `at ptr [file]`. 
@@ -72,7 +72,7 @@ program with `R HPCALC`. A ctrl-c should return you to the OS/8 prompt.
 
 Currently...
 * Handle HP-45 error display (slightly challenging)
-* Macro support for HP-35 only and HP-45 only versions, single field if possible
+* Support for printing terminals (pretty easy, I think)
 
 ### SPECIAL THANKS ###
 
