@@ -16,29 +16,29 @@ or implied.
 
 ### REQUIREMENTS ###
 
-This has been tested and works fine under `SimH`. Previous versions have run
+This has been tested and works fine under SimH. Previous versions have run
 well on Omnibus hardware. With macros, a 4k HP-35 only version is available,
 but otherwise, it requires two fields (8k words) to run. This program relies on
-the over-typing of a single line of text with the video terminal flag set;
+the over-typing of a single line of text with the video terminal switch set;
 hence, a video terminal is recommended. However, a rudimentary printing
 terminal option has been developed.
 
-`palbart` is used to assemble the file for use under `SimH`. `gcc` or `clang` is
+`palbart` is used to assemble the file for use under SimH. `gcc` or `clang` is
 used to compile `obj2oct`, which is a simple utility used to convert a
 `nonpareil` object file to an octal syntax used in the program. A simple
-`Makefile` is provided in order to assemble the binary for `SimH` use, and can
+`Makefile` is provided in order to assemble the binary for SimH use, and can
 be used assuming `palbart` is installed as `pal` in your path. 
 
 ### BASIC USAGE ###
 
-Starting the program at `0200` will run the simulator; switching SR0 (the
+Starting the program at 0200 will run the simulator; switching SR0 (the
 left-most switch) will toggle between HP-35 (0) and HP-45 (1) modes if
 assembled with the default options. Typing `?` will print the valid keys used
 to interact with the simulator, again assuming the full version was assembled.
 
 ### OS/8 USAGE ###
 
-Ensure the flags are set correctly; the default options are for the 8k
+Ensure the switches are set correctly; the default options are for the 8k
 full-featured OS/8 version, which should work fine. Transfer the file to the
 OS/8 image of your choice using PIP, but first, ensure that the assembly file
 has DOS line endings. In VIM, you can do this with `:e ++ff=dos` followed by a
@@ -67,12 +67,11 @@ appropriate value (page 1-37 in the OS/8 Handbook).
 
 Now, you can `RUN DSK HPCALC` to start the program. Assuming you have enough
 room on `SYS:`, you can `COPY SYS:HPCALC.SV<DSK:HPCALC.SV` and now start the
-program with `R HPCALC`. A ctrl-c should return you to the OS/8 prompt.
+program with `R HPCALC`. A `ctrl-c` should return you to the OS/8 prompt.
 
 ### TO-DO ###
 
 Currently...
-* Handle HP-45 error display (slightly challenging)
 * Better support for printing terminals (more challenging)
 
 ### SPECIAL THANKS ###
